@@ -1,0 +1,59 @@
+Descripcion Empresa
+Descripcion Comprobante
+Letra
+Serie \ Punto de venta
+Numero
+Regimen
+Motivo Rechazo / Devolucion
+Descripcion Motivo Rechazo / Devolucion
+Fecha Comprobante
+Emisor
+Sucursal
+Descripcion Sucursal
+Esquema
+Descripcion Esquema
+Deposito
+Descripcion Deposito
+Vendedor
+Descripcion Vendedor
+Sector de venta
+Descripcion de Sector de Venta
+Supervisor
+Descripcion Supervisor
+Descripcion Tipo IVA
+Fecha pedido
+Descripcion Transporte
+Cajero
+Cliente
+Razon Social
+Domicilio
+Codigo de Articulo
+Descripcion de Articulo
+MARCA
+Descripción MARCA
+GENERICO
+Descripción GENERICO
+Proveedor
+Precio de compra Bruto
+Precio de compra Neto
+Bultos Cerrados
+Unidades
+Bultos con Cargo
+Bultos sin Cargo
+Bultos Total
+Bultos Rechazados
+Precio Unitario Bruto
+Bonificacion %
+Precio Neto Unitario
+Subtotal Bruto
+Subtotal Bonificado
+Subtotal Neto
+I.V.A 21%
+I.V.A. 27%
+I.V.A. 10.5%
+Percepción 3337
+Percepción 5329
+Percepción 212
+I.I.B.B(SALTA)
+Impuestos Internos
+Subtotal Final
