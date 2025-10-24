@@ -475,8 +475,8 @@
         "idAlmacen": 0,
         "idArticulo": 14001,
         "dsArticulo": "BOTELLA AMBAR 12 X 1LT",
-        "cantBultos": 1371,
-        "cantUnidades": 4
+        "cantBultos": 1404,
+        "cantUnidades": 10
       },
       {
         "fecha": null,
@@ -529,7 +529,7 @@
         "idAlmacen": 0,
         "idArticulo": 14501,
         "dsArticulo": "ESQUELETO AMARILLO 1 LITRO",
-        "cantBultos": 1377,
+        "cantBultos": 1410,
         "cantUnidades": 0
       },
       {
@@ -556,7 +556,7 @@
         "idAlmacen": 0,
         "idArticulo": 16591,
         "dsArticulo": "BOTELLA AMBAR 1200 * 10",
-        "cantBultos": 228,
+        "cantBultos": 230,
         "cantUnidades": 9
       },
       {
@@ -565,7 +565,7 @@
         "idAlmacen": 0,
         "idArticulo": 16593,
         "dsArticulo": "ESQUELETO * 10 BOTELLAS",
-        "cantBultos": 229,
+        "cantBultos": 231,
         "cantUnidades": 0
       },
       {
@@ -9016,7 +9016,7 @@
         "idAlmacen": 0,
         "idArticulo": 125849,
         "dsArticulo": "VILLA DEL SUR S/GAS 1650*6",
-        "cantBultos": 97,
+        "cantBultos": 657,
         "cantUnidades": 1
       },
       {
@@ -13084,7 +13084,7 @@
         "idAlmacen": 0,
         "idArticulo": 125851,
         "dsArticulo": "VILLA DEL SUR S/GAS 600*12",
-        "cantBultos": 37,
+        "cantBultos": 187,
         "cantUnidades": 11
       },
       {
@@ -14038,7 +14038,7 @@
         "idAlmacen": 0,
         "idArticulo": 125973,
         "dsArticulo": "BRIO NARANJA S/GAS 1500*6",
-        "cantBultos": 1,
+        "cantBultos": 113,
         "cantUnidades": 3
       },
       {
@@ -14416,7 +14416,7 @@
         "idAlmacen": 0,
         "idArticulo": 125855,
         "dsArticulo": "VILLA DEL SUR S/GAS 2250*6",
-        "cantBultos": 1,
+        "cantBultos": 801,
         "cantUnidades": 0
       },
       {
@@ -16306,7 +16306,7 @@
         "idAlmacen": 0,
         "idArticulo": 195141,
         "dsArticulo": "VILLA DEL SUR BIDON 6200*2",
-        "cantBultos": 179,
+        "cantBultos": 685,
         "cantUnidades": 0
       },
       {
@@ -17764,7 +17764,7 @@
         "idAlmacen": 0,
         "idArticulo": 197202,
         "dsArticulo": "LEVITE POMELO ROSADO 1500*6",
-        "cantBultos": 22,
+        "cantBultos": 134,
         "cantUnidades": 0
       },
       {
@@ -17800,7 +17800,7 @@
         "idAlmacen": 0,
         "idArticulo": 23179,
         "dsArticulo": "SCHNEIDER 710*24 LATA 0606",
-        "cantBultos": 1681,
+        "cantBultos": 1682,
         "cantUnidades": 9
       },
       {
@@ -18223,7 +18223,7 @@
         "idAlmacen": 0,
         "idArticulo": 23069,
         "dsArticulo": "SALTA NEGRA 473*24 LATA",
-        "cantBultos": 97,
+        "cantBultos": 96,
         "cantUnidades": 13
       },
       {
@@ -18251,6 +18251,24 @@
         "idArticulo": 197232,
         "dsArticulo": "LEVITE LIMONADA 1500*6",
         "cantBultos": 94,
+        "cantUnidades": 0
+      },
+      {
+        "fecha": null,
+        "idDeposito": 68,
+        "idAlmacen": 0,
+        "idArticulo": 197235,
+        "dsArticulo": "FULL SPORT FRUTAS TROPICALES 500*6",
+        "cantBultos": 270,
+        "cantUnidades": 0
+      },
+      {
+        "fecha": null,
+        "idDeposito": 68,
+        "idAlmacen": 0,
+        "idArticulo": 197236,
+        "dsArticulo": "FULL SPORT FRESH BLUE 500*6",
+        "cantBultos": 270,
         "cantUnidades": 0
       }
     ]
