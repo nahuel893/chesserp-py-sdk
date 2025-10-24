@@ -15,13 +15,6 @@ print(ABS_PATH)
 print(DATA_PATH)
 
 
-"""
-    TO-DO:
-    * Import and export to csv
-    * Add tests
-    * Create Sales class
-"""
-
 def main(): # Creamos una instancia de la clase Endpoint
     load_dotenv()
     

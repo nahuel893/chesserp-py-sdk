@@ -10,4 +10,5 @@ node_modules/
 *.xlsx
 *.xls
 *.csv
+*.txt
 
