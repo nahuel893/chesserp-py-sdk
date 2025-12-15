@@ -132,6 +132,15 @@ class Settings(BaseSettings):
     chess_b_username: str = Field(alias="USERNAME_B")
     chess_b_password: str = Field(alias="PASSWORD_B")
 
+    # API paths
+    api_path: str = Field(default="/web/api/chess/v1/", description="Path base de la API")
+    api_path_login: str = Field(default="/web/api/chess/v1/auth/login", description="Path completo de login")
+
+    @field_validator('api_path_login')
+    def validate_api_path_login(cls, v):
+        """Quita barra final del path de login para evitar redirects"""
+        return v.rstrip('/')
+
     # Configuraciones embebidas
     database: DatabaseConfig = Field(default_factory=DatabaseConfig)
     paths: PathConfig = Field(default_factory=PathConfig)

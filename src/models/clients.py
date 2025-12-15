@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List, Optional, Union
 from pydantic import BaseModel, Field
 
 class ClienteAlias(BaseModel):
@@ -85,7 +85,7 @@ class Cliente(BaseModel):
     id_sucursal: int = Field(alias="idSucursal")
     des_sucursal: Optional[str] = Field(None, alias="desSucursal")
     id_cliente: int = Field(alias="idCliente")
-    fecha_alta: Optional[int] = Field(None, alias="fechaAlta") # HTML dice Integer!
+    fecha_alta: Optional[str] = Field(None, alias="fechaAlta")  # API retorna formato: '2021-08-25'
     anulado: Optional[bool] = Field(None, alias="anulado")
     fecha_baja: Optional[str] = Field(None, alias="fechaBaja")
     
@@ -117,28 +117,28 @@ class Cliente(BaseModel):
     des_localidad: Optional[str] = Field(None, alias="desLocalidad")
     calle: Optional[str] = Field(None, alias="calle")
     altura: Optional[int] = Field(None, alias="altura")
-    entre_calle_1: Optional[int] = Field(None, alias="entreCalle1")
-    entre_calle_2: Optional[int] = Field(None, alias="entreCalle2")
-    comentario: Optional[int] = Field(None, alias="comentario") # HTML dice Integer
-    longitud_geo: Optional[int] = Field(None, alias="longitudGeo")
-    latitud_geo: Optional[int] = Field(None, alias="latitudGeo")
-    horario: Optional[int] = Field(None, alias="horario") # HTML dice Integer
+    entre_calle_1: Optional[Union[str, int]] = Field(None, alias="entreCalle1")  # API retorna strings o ints
+    entre_calle_2: Optional[Union[str, int]] = Field(None, alias="entreCalle2")  # API retorna strings o ints
+    comentario: Optional[Union[str, int]] = Field(None, alias="comentario")  # API retorna strings o ints
+    longitud_geo: Optional[Union[str, int]] = Field(None, alias="longitudGeo")  # API retorna strings o ints
+    latitud_geo: Optional[Union[str, int]] = Field(None, alias="latitudGeo")  # API retorna strings o ints
+    horario: Optional[Union[str, int]] = Field(None, alias="horario")  # API retorna strings o ints
     
     # Ubicación Entrega
     id_localidad_entrega: Optional[int] = Field(None, alias="idLocalidadEntrega")
     des_localidad_entrega: Optional[str] = Field(None, alias="desLocalidadEntrega")
     calle_entrega: Optional[str] = Field(None, alias="calleEntrega")
     altura_entrega: Optional[int] = Field(None, alias="alturaEntrega")
-    piso_depto_entrega: Optional[int] = Field(None, alias="pisoDeptoEntrega")
-    entre_calle_1_entrega: Optional[int] = Field(None, alias="entreCalle1Entrega")
-    entre_calle_2_entrega: Optional[int] = Field(None, alias="entreCalle2Entrega")
+    piso_depto_entrega: Optional[Union[str, int]] = Field(None, alias="pisoDeptoEntrega")  # API retorna strings o ints
+    entre_calle_1_entrega: Optional[Union[str, int]] = Field(None, alias="entreCalle1Entrega")  # API retorna strings o ints (ej: 'SANTA CECILIA' o 0)
+    entre_calle_2_entrega: Optional[Union[str, int]] = Field(None, alias="entreCalle2Entrega")  # API retorna strings o ints
     comentario_entrega: Optional[str] = Field(None, alias="comentarioEntrega")
-    longitud_geo_entrega: Optional[int] = Field(None, alias="longitudGeoEntrega")
-    latitud_geo_entrega: Optional[int] = Field(None, alias="latitudGeoEntrega")
-    horario_entrega: Optional[int] = Field(None, alias="horarioEntrega")
+    longitud_geo_entrega: Optional[Union[str, int]] = Field(None, alias="longitudGeoEntrega")  # API retorna strings o ints
+    latitud_geo_entrega: Optional[Union[str, int]] = Field(None, alias="latitudGeoEntrega")  # API retorna strings o ints
+    horario_entrega: Optional[Union[str, int]] = Field(None, alias="horarioEntrega")  # API retorna strings o ints
     
     # Contacto
-    telefono_fijo: Optional[int] = Field(None, alias="telefonoFijo")
+    telefono_fijo: Optional[Union[str, int]] = Field(None, alias="telefonoFijo")  # API retorna strings o ints (puede incluir guiones, espacios, etc.)
     telefono_movil: Optional[str] = Field(None, alias="telefonoMovil")
     email: Optional[str] = Field(None, alias="email")
     comentario_adicional: Optional[str] = Field(None, alias="comentarioAdicional")
@@ -172,7 +172,7 @@ class Cliente(BaseModel):
     des_subcategoria_foco: Optional[str] = Field(None, alias="desSubcategoriaFoco")
     foco_trade: Optional[bool] = Field(None, alias="focoTrade")
     foco_ventas: Optional[bool] = Field(None, alias="focoVentas")
-    cluster_ventas: Optional[int] = Field(None, alias="clusterVentas")
+    cluster_ventas: Optional[Union[str, int]] = Field(None, alias="clusterVentas")  # API retorna strings o ints
     
     # Relaciones
     cliente_alias: Optional[List[ClienteAlias]] = Field(None, alias="cliente alias")

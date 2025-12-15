@@ -1,8 +1,7 @@
-from typing import List, Optional
+from typing import List, Optional, Union
 from pydantic import BaseModel, Field
 
 # --- Submodelos para Artículos ---
-
 class AgrupacionArticulo(BaseModel):
     """
     Agrupación de artículos.
@@ -38,10 +37,11 @@ class Articulo(BaseModel):
     """
     id_articulo: int = Field(alias="idArticulo")
     des_articulo: str = Field(alias="desArticulo")
+    desc_detallada: Optional[str] = Field(None, alias="descDetallada")
     unidades_bulto: Optional[int] = Field(None, alias="unidadesBulto")
     anulado: Optional[bool] = Field(None, alias="anulado")
     fecha_alta: Optional[str] = Field(None, alias="fechaAlta")
-    factor_venta: Optional[str] = Field(None, alias="factorVenta")
+    factor_venta: Optional[Union[str, int]] = Field(None, alias="factorVenta")
     minimo_venta: Optional[int] = Field(None, alias="minimoVenta")
     
     # Flags y Propiedades Físicas
@@ -51,7 +51,7 @@ class Articulo(BaseModel):
     
     es_combo: Optional[bool] = Field(None, alias="esCombo")
     detalle_combo_imp: Optional[int] = Field(None, alias="detalleComboImp")
-    detalle_combo_inf: Optional[str] = Field(None, alias="detalleComboInf")
+    detalle_combo_inf: Optional[Union[str, bool]] = Field(None, alias="detalleComboInf")
     
     # Impuestos
     exento_iva: Optional[bool] = Field(None, alias="exentoIva")
@@ -60,7 +60,7 @@ class Articulo(BaseModel):
     iva_diferencial: Optional[bool] = Field(None, alias="ivaDiferencial")
     tasa_iva: Optional[int] = Field(None, alias="tasaIva")
     tasa_internos: Optional[int] = Field(None, alias="tasaInternos")
-    internos_bulto: Optional[int] = Field(None, alias="internosBulto")
+    internos_bulto: Optional[float] = Field(None, alias="internosBulto")
     tasa_iibb: Optional[int] = Field(None, alias="tasaIibb")
     
     # Flags Comerciales
@@ -72,19 +72,19 @@ class Articulo(BaseModel):
     # Presentaciones (En HTML son Integer, salvo las descripciones que deberían ser String pero HTML dice Integer? Asumiremos int o str si falla)
     # defs["articulos"] -> desPresentacionBulto: "type": "integer". Esto huele a error en la doc HTML.
     # Usaré Union[int, str] o Optional[str] para ser seguro.
-    id_presentacion_bulto: Optional[int] = Field(None, alias="idPresentacionBulto")
-    des_presentacion_bulto: Optional[str] = Field(None, alias="desPresentacionBulto") 
-    id_presentacion_unidad: Optional[int] = Field(None, alias="idPresentacionUnidad")
+    id_presentacion_bulto: Optional[Union[int, str]] = Field(None, alias="idPresentacionBulto")
+    des_presentacion_bulto: Optional[str] = Field(None, alias="desPresentacionBulto")
+    id_presentacion_unidad: Optional[Union[int, str]] = Field(None, alias="idPresentacionUnidad")
     des_presentacion_unidad: Optional[str] = Field(None, alias="desPresentacionUnidad")
     
     id_unidad_medida: Optional[int] = Field(None, alias="idUnidadMedida")
     des_unidad_medida: Optional[str] = Field(None, alias="desUnidadMedida") 
-    valor_unidad_medida: Optional[int] = Field(None, alias="valorUnidadMedida")
+    valor_unidad_medida: Optional[float] = Field(None, alias="valorUnidadMedida")
     
     # Logística
     id_articulo_estadistico: Optional[int] = Field(None, alias="idArticuloEstadistico")
-    cod_barra_bulto: Optional[int] = Field(None, alias="codBarraBulto") # HTML dice Integer
-    cod_barra_unidad: Optional[int] = Field(None, alias="codBarraUnidad") # HTML dice Integer
+    cod_barra_bulto: Optional[Union[int, str]] = Field(None, alias="codBarraBulto")
+    cod_barra_unidad: Optional[Union[int, str]] = Field(None, alias="codBarraUnidad")
     tiene_retornables: Optional[bool] = Field(None, alias="tieneRetornables")
     bultos_pallet: Optional[int] = Field(None, alias="bultosPallet")
     pisos_pallet: Optional[int] = Field(None, alias="pisosPallet")
@@ -103,13 +103,9 @@ class Articulo(BaseModel):
     
     id_art_usado: Optional[int] = Field(None, alias="idArtUsado")
     anios_amortizacion: Optional[int] = Field(None, alias="aniosAmortizacion")
-    
+
     # Listas anidadas
-    agrupaciones: Optional[List[AgrupacionArticulo]] = Field(None, alias="agrupaciones")
-    # Relavacio no está directo en `articulos` en el HTML dump que vi, pero sí dentro de agrupaciones.
-    # Sin embargo, PDF lo ponía en artículo. Lo dejaré comentado o fuera si no sale en el dump HTML raiz.
-    # Revisando el dump... "agrupaciones": { type: array, items: ref agrupaciones }
-    # No veo "relavacio" directo en articulos, solo dentro de agrupaciones.
+    agrupaciones: Optional[List[AgrupacionArticulo]] = Field(None, alias="eAgrupaciones")
 
 # --- Modelo de Stock Físico ---
 
@@ -118,7 +114,7 @@ class StockFisico(BaseModel):
     Stock físico.
     Ref: HTML defs["stock"] (No visible en el dump truncado, mantengo estructura PDF/General)
     """
-    fecha: str = Field(alias="fecha")
+    fecha: Optional[str] = Field(None, alias="fecha")
     id_deposito: int = Field(alias="idDeposito")
     id_almacen: Optional[int] = Field(None, alias="idAlmacen")
     id_articulo: int = Field(alias="idArticulo")

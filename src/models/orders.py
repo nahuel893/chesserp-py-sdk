@@ -21,23 +21,27 @@ class Pedido(BaseModel):
     """
     Pedido.
     Ref: HTML defs["PedidosRequest"] (Usado como base para respuesta)
+
+    Nota: La API retorna varios IDs como strings en lugar de integers,
+    especialmente idPedido (formato: 'NXB-15-2516938'), idUsuario (username),
+    idTipoDocumento (código del tipo de documento) e idModoAtencion.
     """
-    id_pedido: int = Field(alias="idPedido")
+    id_pedido: str = Field(alias="idPedido")  # Formato: 'NXB-15-2516938'
     origen: str = Field(alias="origen")
-    id_usuario: int = Field(alias="idUsuario")
+    id_usuario: str = Field(alias="idUsuario")  # Username, ej: 'NCAMPOS'
     id_empresa: int = Field(alias="idEmpresa")
     id_sucursal: int = Field(alias="idSucursal")
-    
+
     id_fuerza_ventas: Optional[int] = Field(None, alias="idFuerzaVentas")
     id_deposito: Optional[int] = Field(None, alias="idDeposito")
     id_forma_pago: Optional[int] = Field(None, alias="idFormaPago")
-    id_tipo_documento: Optional[int] = Field(None, alias="idTipoDocumento")
+    id_tipo_documento: Optional[str] = Field(None, alias="idTipoDocumento")  # Código tipo doc, ej: 'FCVTA'
     id_cliente: int = Field(alias="idCliente")
     id_alias_cliente: Optional[int] = Field(None, alias="idAliasCliente")
-    
+
     fecha_entrega: Optional[str] = Field(None, alias="fechaEntrega")
     id_vendedor: Optional[int] = Field(None, alias="idVendedor")
-    id_modo_atencion: Optional[int] = Field(None, alias="idModoAtencion")
+    id_modo_atencion: Optional[str] = Field(None, alias="idModoAtencion")  # También puede ser string
     
     # Detalle con nombre "líneas del pedido" según HTML
     lineas: Optional[List[LineaPedido]] = Field(None, alias="líneas del pedido")
