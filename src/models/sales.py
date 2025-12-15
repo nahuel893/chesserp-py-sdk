@@ -1,67 +1,67 @@
 from typing import List, Optional, Union
 from pydantic import BaseModel, Field
 
-class SaleLine(BaseModel):
-    """
-    Línea de detalle de una venta.
-    Ref: HTML defs["ventasDetalle"] (Inferido por contexto de lista "líneas del venta")
-    """
-    id_linea: int = Field(alias="idLinea")
-    id_articulo: int = Field(alias="idArticulo")
-    ds_articulo: Optional[str] = Field(None, alias="dsArticulo")
-    id_concepto: Optional[int] = Field(None, alias="idConcepto")
-    ds_concepto: Optional[str] = Field(None, alias="dsConcepto")
-    es_combo: Optional[str] = Field(None, alias="esCombo")
-    id_combo: Optional[int] = Field(None, alias="idCombo")
-    
-    # Datos Estadísticos
-    id_articulo_estadistico: Optional[int] = Field(None, alias="idArticuloEstadistico")
-    ds_articulo_estadistico: Optional[str] = Field(None, alias="dsArticuloEstadistico")
-    presentacion_articulo: Optional[str] = Field(None, alias="presentacionArticulo")
-    
-    # Cantidades
-    cantidad_por_pallets: Optional[int] = Field(None, alias="cantidadPorPallets")
-    peso: Optional[float] = Field(None, alias="peso")
-    cantidad_solicitada: Optional[float] = Field(None, alias="cantidadSolicitada")
-    unidades_solicitadas: Optional[float] = Field(None, alias="unidadesSolicitadas")
-    
-    # Cantidades con/sin cargo (HTML pg 46 approx)
-    cantidades_con_cargo: Optional[float] = Field(None, alias="cantidadesCorCargo") # Nota: HTML/PDF suele tener typo 'CorCargo'
-    cantidades_sin_cargo: Optional[float] = Field(None, alias="cantidadesSinCargo")
-    cantidades_total: Optional[float] = Field(None, alias="cantidadesTotal")
-    peso_total: Optional[float] = Field(None, alias="pesoTotal")
-    cantidades_rechazo: Optional[float] = Field(None, alias="cantidadesRechazo")
-    
-    # Unidades Medida
-    unimed_cargo: Optional[float] = Field(None, alias="unimedcargo")
-    unimed_scargo: Optional[float] = Field(None, alias="unimedscargo")
-    unimed_total: Optional[float] = Field(None, alias="unimedtotal")
-    
-    # Precios y Montos
-    precio_unitario_bruto: Optional[float] = Field(None, alias="precioUnitarioBruto")
-    bonificacion: Optional[float] = Field(None, alias="bonificacion")
-    precio_unitario_neto: Optional[float] = Field(None, alias="precioUnitarioNeto")
-    tipo_cambio: Optional[float] = Field(None, alias="tipocambio")
-    
-    # Motivos
-    motivo_cambio: Optional[str] = Field(None, alias="motivocambio")
-    desc_motivo_cambio: Optional[str] = Field(None, alias="descmotcambio")
-    
-    # Totales Línea
-    subtotal_bruto: Optional[float] = Field(None, alias="subtotalBruto")
-    subtotal_bonificado: Optional[float] = Field(None, alias="subtotalBonificado")
-    subtotal_neto: Optional[float] = Field(None, alias="subtotalNeto")
-    subtotal_final: Optional[float] = Field(None, alias="subtotalFinal")
-    
-    # Impuestos
-    iva21: Optional[float] = Field(None, alias="iva21")
-    iva27: Optional[float] = Field(None, alias="iva27")
-    iva105: Optional[float] = Field(None, alias="iva105")
-    internos: Optional[float] = Field(None, alias="internos")
-    per3337: Optional[float] = Field(None, alias="per3337")
-    percepcion212: Optional[float] = Field(None, alias="percepcion212")
-    percepcion_iibb: Optional[float] = Field(None, alias="percepcioniibb")
-
+# class SaleLine(BaseModel):
+#     """
+#     Línea de detalle de una venta.
+#     Ref: HTML defs["ventasDetalle"] (Inferido por contexto de lista "líneas del venta")
+#     """
+#     id_linea: int = Field(alias="idLinea")
+#     id_articulo: int = Field(alias="idArticulo")
+#     ds_articulo: Optional[str] = Field(None, alias="dsArticulo")
+#     id_concepto: Optional[int] = Field(None, alias="idConcepto")
+#     ds_concepto: Optional[str] = Field(None, alias="dsConcepto")
+#     es_combo: Optional[str] = Field(None, alias="esCombo")
+#     id_combo: Optional[int] = Field(None, alias="idCombo")
+#     
+#     # Datos Estadísticos
+#     id_articulo_estadistico: Optional[int] = Field(None, alias="idArticuloEstadistico")
+#     ds_articulo_estadistico: Optional[str] = Field(None, alias="dsArticuloEstadistico")
+#     presentacion_articulo: Optional[str] = Field(None, alias="presentacionArticulo")
+#     
+#     # Cantidades
+#     cantidad_por_pallets: Optional[int] = Field(None, alias="cantidadPorPallets")
+#     peso: Optional[float] = Field(None, alias="peso")
+#     cantidad_solicitada: Optional[float] = Field(None, alias="cantidadSolicitada")
+#     unidades_solicitadas: Optional[float] = Field(None, alias="unidadesSolicitadas")
+#     
+#     # Cantidades con/sin cargo (HTML pg 46 approx)
+#     cantidades_con_cargo: Optional[float] = Field(None, alias="cantidadesCorCargo") # Nota: HTML/PDF suele tener typo 'CorCargo'
+#     cantidades_sin_cargo: Optional[float] = Field(None, alias="cantidadesSinCargo")
+#     cantidades_total: Optional[float] = Field(None, alias="cantidadesTotal")
+#     peso_total: Optional[float] = Field(None, alias="pesoTotal")
+#     cantidades_rechazo: Optional[float] = Field(None, alias="cantidadesRechazo")
+#     
+#     # Unidades Medida
+#     unimed_cargo: Optional[float] = Field(None, alias="unimedcargo")
+#     unimed_scargo: Optional[float] = Field(None, alias="unimedscargo")
+#     unimed_total: Optional[float] = Field(None, alias="unimedtotal")
+#     
+#     # Precios y Montos
+#     precio_unitario_bruto: Optional[float] = Field(None, alias="precioUnitarioBruto")
+#     bonificacion: Optional[float] = Field(None, alias="bonificacion")
+#     precio_unitario_neto: Optional[float] = Field(None, alias="precioUnitarioNeto")
+#     tipo_cambio: Optional[float] = Field(None, alias="tipocambio")
+#     
+#     # Motivos
+#     motivo_cambio: Optional[str] = Field(None, alias="motivocambio")
+#     desc_motivo_cambio: Optional[str] = Field(None, alias="descmotcambio")
+#     
+#     # Totales Línea
+#     subtotal_bruto: Optional[float] = Field(None, alias="subtotalBruto")
+#     subtotal_bonificado: Optional[float] = Field(None, alias="subtotalBonificado")
+#     subtotal_neto: Optional[float] = Field(None, alias="subtotalNeto")
+#     subtotal_final: Optional[float] = Field(None, alias="subtotalFinal")
+#     
+#     # Impuestos
+#     iva21: Optional[float] = Field(None, alias="iva21")
+#     iva27: Optional[float] = Field(None, alias="iva27")
+#     iva105: Optional[float] = Field(None, alias="iva105")
+#     internos: Optional[float] = Field(None, alias="internos")
+#     per3337: Optional[float] = Field(None, alias="per3337")
+#     percepcion212: Optional[float] = Field(None, alias="percepcion212")
+#     percepcion_iibb: Optional[float] = Field(None, alias="percepcioniibb")
+#
 
 class Sale(BaseModel):
     """
@@ -220,6 +220,60 @@ class Sale(BaseModel):
     estado_fiscal: Optional[int] = Field(None, alias="estadoFiscal")
     numeracion_fiscal: Optional[Union[int, str]] = Field(None, alias="numeracionFiscal")
 
-    # Lista de Items
-    # Ref: HTML property "líneas del venta"
-    lines: Optional[List[SaleLine]] = Field(None, alias="líneas del venta")
+    id_linea: int = Field(alias="idLinea")
+    id_articulo: int = Field(alias="idArticulo")
+    ds_articulo: Optional[str] = Field(None, alias="dsArticulo")
+    id_concepto: Optional[int] = Field(None, alias="idConcepto")
+    ds_concepto: Optional[str] = Field(None, alias="dsConcepto")
+    es_combo: Optional[str] = Field(None, alias="esCombo")
+    id_combo: Optional[int] = Field(None, alias="idCombo")
+    
+    # Datos Estadísticos
+    id_articulo_estadistico: Optional[int] = Field(None, alias="idArticuloEstadistico")
+    ds_articulo_estadistico: Optional[str] = Field(None, alias="dsArticuloEstadistico")
+    presentacion_articulo: Optional[Union[str, int]] = Field(None, alias="presentacionArticulo")  # API retorna strings o ints
+    
+    # Cantidades
+    cantidad_por_pallets: Optional[int] = Field(None, alias="cantidadPorPallets")
+    peso: Optional[float] = Field(None, alias="peso")
+    cantidad_solicitada: Optional[float] = Field(None, alias="cantidadSolicitada")
+    unidades_solicitadas: Optional[float] = Field(None, alias="unidadesSolicitadas")
+    
+    # Cantidades con/sin cargo (HTML pg 46 approx)
+    cantidades_con_cargo: Optional[float] = Field(None, alias="cantidadesCorCargo") # Nota: HTML/PDF suele tener typo 'CorCargo'
+    cantidades_sin_cargo: Optional[float] = Field(None, alias="cantidadesSinCargo")
+    cantidades_total: Optional[float] = Field(None, alias="cantidadesTotal")
+    peso_total: Optional[float] = Field(None, alias="pesoTotal")
+    cantidades_rechazo: Optional[float] = Field(None, alias="cantidadesRechazo")
+    
+    # Unidades Medida
+    unimed_cargo: Optional[float] = Field(None, alias="unimedcargo")
+    unimed_scargo: Optional[float] = Field(None, alias="unimedscargo")
+    unimed_total: Optional[float] = Field(None, alias="unimedtotal")
+    
+    # Precios y Montos
+    precio_unitario_bruto: Optional[float] = Field(None, alias="precioUnitarioBruto")
+    bonificacion: Optional[float] = Field(None, alias="bonificacion")
+    precio_unitario_neto: Optional[float] = Field(None, alias="precioUnitarioNeto")
+    tipo_cambio: Optional[Union[float, str]] = Field(None, alias="tipocambio")  # API retorna floats o strings vacíos
+    
+    # Motivos
+    motivo_cambio: Optional[Union[str, int]] = Field(None, alias="motivocambio")  # API retorna strings o ints (0)
+    desc_motivo_cambio: Optional[str] = Field(None, alias="descmotcambio")
+    
+    # Totales Línea
+    subtotal_bruto: Optional[float] = Field(None, alias="subtotalBruto")
+    subtotal_bonificado: Optional[float] = Field(None, alias="subtotalBonificado")
+    subtotal_neto: Optional[float] = Field(None, alias="subtotalNeto")
+    subtotal_final: Optional[float] = Field(None, alias="subtotalFinal")
+    
+    # Impuestos
+    iva21: Optional[float] = Field(None, alias="iva21")
+    iva27: Optional[float] = Field(None, alias="iva27")
+    iva105: Optional[float] = Field(None, alias="iva105")
+    internos: Optional[float] = Field(None, alias="internos")
+    per3337: Optional[float] = Field(None, alias="per3337")
+    percepcion212: Optional[float] = Field(None, alias="percepcion212")
+    percepcion_iibb: Optional[float] = Field(None, alias="percepcioniibb")
+
+
