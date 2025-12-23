@@ -1,0 +1,94 @@
+
+  "dsReporteComprobantesApi": {
+    "VentasResumen": [
+      {
+        "idEmpresa": 1,
+        "dsEmpresa": "BADIE SA",
+        "idDocumento": "FCVTA",
+        "dsDocumento": "FACTURA",
+        "letra": "B",
+        "serie": 66,
+        "nrodoc": 17099,
+        "pickup": "NO",
+        "anulado": "NO",
+        "idMovComercial": null,
+        "dsMovComercial": "",
+        "idRechazo": 0,
+        "dsRechazo": "",
+        "fechaComprobate": "2025-11-01",
+        "fechaAnulacion": null,
+        ... (mas campos)
+        }
+    ]
+  },
+  "cantComprobantesVentas": "Numero de lote obtenido: 1/70. Cantidad de comprobantes totales: 69041"
+}
+
+
+{
+  "Articulos": {
+    "eArticulos": [
+      {
+        "idArticulo": 21511,
+        "desArticulo": "HNK RUB BOT 1000CC NR 1X6 LO",
+        "descDetallada": "",
+        "unidadesBulto": 6,
+        "anulado": false,
+        "fechaAlta": null,
+        "factorVenta": 0,
+        "minimoVenta": 0,
+        "pesable": false,
+        "pesoCotaSuperior": 0.00,
+        "pesoCotaInferior": 0.00,
+        "esCombo": false,
+        "detalleComboImp": false,
+        "detalleComboInf": false,
+        "exentoIva": false,
+        "inafecto": false,
+        "exonerado": false,
+        ... *mas campos*
+        "eAgrupaciones": [
+          {
+            "idFormaAgrupar": "05",
+            "desFormaAgrupar": "JU-CERVEZAS",
+            "idArticulo": 21511,
+            "idAgrupacion": "1162",
+            "desAgrupacion": "VNR 1000"
+          },
+          {
+            "idFormaAgrupar": "CALIBRE",
+            "desFormaAgrupar": "CALIBRE",
+            "idArticulo": 21511,
+            "idAgrupacion": "1662",
+            "desAgrupacion": "1000CC"
+          },
+          {
+            "idFormaAgrupar": "CATEG",
+            "desFormaAgrupar": "ZCATEGORIA",
+            "idArticulo": 21511,
+            "idAgrupacion": "1541",
+            "desAgrupacion": "INFO BADIE"
+          },
+          {
+            "idFormaAgrupar": "DIVISION",
+            "desFormaAgrupar": "DIVISION",
+            "idArticulo": 21511,
+            "idAgrupacion": "1215",
+            "desAgrupacion": "HEINEKEN"
+          },
+          ... (mas formas de agrupar)
+          {
+            "idFormaAgrupar": "UNIDAD DE NEGOCIO",
+            "desFormaAgrupar": "NEGOCIO",
+            "idArticulo": 21511,
+            "idAgrupacion": "1501",
+            "desAgrupacion": "CERVEZAS"
+          }
+        ]
+      } 
+    }
+  },
+  "cantArticulos": "Numero de lote obtenido: 2/22. Cantidad de articulos totales: 2103"
+}
+
+

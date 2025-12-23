@@ -114,7 +114,7 @@ class ChessClient:
                 raise apierror(response.status_code, f"request to {endpoint} failed", response.text)
 
             json_data = response.json()
-
+        #    logger.debug(f"{json_data}")
             if isinstance(json_data, list) and len(json_data) == 0:
                 logger.debug(f"Empty list returned. Raw response: {response.text}")
             
@@ -352,49 +352,57 @@ class ChessClient:
         """
         Busca clientes validados con Pydantic.
         """
-        # Primera request  para obtener el primer lote y el total de lotes
-        response_data = self.get_customers_raw( nro_lote=1)
-
         # Inicializar lista acumuladora
         customers_data = []
 
-        # Extraer el primer lote de datos
-        if isinstance(response_data, dict):
-            customers_list = response_data.get("Clientes", {}).get("eClientes")
+        if nro_lote == 0:
+            # Primera request  para obtener el primer lote y el total de lotes
+            response_data = self.get_customers_raw( nro_lote=1)
 
-            if customers_list is not None:
-                customers_data.extend(self._parse_list(customers_list, Cliente))
-                logger.info(f"Lote 1 procesado: {len(customers_list)} registros")
+            # Extraer el primer lote de datos
+            if isinstance(response_data, dict):
+                customers_list = response_data.get("Clientes", {}).get("eClientes")
 
-            # Obtener el total de lotes usando regex
-            # Formato: "Numero de lote obtenido: 1/70. Cantidad de comprobantes totales: 69041"
-            cant_clientes_str = response_data.get("cantClientes", "")
-            logger.debug(f"cantClientes: {cant_clientes_str}")
+                if customers_list is not None:
+                    customers_data.extend(self._parse_list(customers_list, Cliente))
+                    logger.info(f"Lote 1 procesado: {len(customers_list)} registros")
 
-            match = re.search(r'(\d+)/(\d+)', cant_clientes_str)
-            if match:
-                lote_actual = int(match.group(1))
-                total_lotes = int(match.group(2))
-                logger.info(f"Total de lotes a procesar: {total_lotes}")
+                # Obtener el total de lotes usando regex
+                # Formato: "Numero de lote obtenido: 1/70. Cantidad de comprobantes totales: 69041"
+                cant_clientes_str = response_data.get("cantClientes", "")
+                logger.debug(f"cantClientes: {cant_clientes_str}")
 
-                # Iterar sobre los lotes restantes (si hay más de 1)
-                for i in range(lote_actual+1, total_lotes+1):
-                    response_data = self.get_customers_raw( nro_lote=1)
+                match = re.search(r'(\d+)/(\d+)', cant_clientes_str)
+                if match:
+                    lote_actual = int(match.group(1))
+                    total_lotes = int(match.group(2))
+                    logger.info(f"Total de lotes a procesar: {total_lotes}")
 
-                    if isinstance(response_data, dict):
-                        list_ = response_data.get("Clientes", {}).get("eClientes")
+                    # Iterar sobre los lotes restantes (si hay más de 1)
+                    for i in range(lote_actual+1, total_lotes+1):
+                        response_data = self.get_customers_raw( nro_lote=1)
 
-                        if list_ is not None:
-                            customers_data.extend(self._parse_list(list_, Cliente))
-                            logger.info(f"Lote {i} procesado: {len(list_)} registros")
-            else:
-                logger.warning(f"No se pudo parsear total de lotes de: {cant_clientes_str}. Asumiendo 1 lote.")
+                        if isinstance(response_data, dict):
+                            list_ = response_data.get("Clientes", {}).get("eClientes")
 
-        logger.info(f"Total de clientes obtenidas: {len(customers_data)}")
+                            if list_ is not None:
+                                customers_data.extend(self._parse_list(list_, Cliente))
+                                logger.info(f"Lote {i} procesado: {len(list_)} registros")
+                else:
+                    logger.warning(f"No se pudo parsear total de lotes de: {cant_clientes_str}. Asumiendo 1 lote.")
+
+            logger.info(f"Total de clientes obtenidas: {len(customers_data)}")
+        else:
+            response_data = self.get_customers_raw(nro_lote=nro_lote)
+            list_ = response_data.get("Clientes", {}).get("eClientes")
+
+            if list_ is not None:
+                customers_data.extend(self._parse_list(list_, Cliente))
+                logger.info(f"Lote {nro_lote} procesado: {len(list_)} registros")
+
         return customers_data
-        raw_data = self.get_customers_raw(sucursal=sucursal, anulado=anulado, nro_lote=nro_lote)
-        raw_data = raw_data.get("Clientes").get("eClientes", [])
-        return self._parse_list(raw_data, Cliente)
+
+
 
     # --- Pedidos ---
     def get_orders_raw(self,
@@ -457,50 +465,37 @@ class ChessClient:
     # --- Rutas ---
 
     def get_routes_raw(self,
-                       sucursal: int = 0,
-                       fuerza_venta: int = 0,
+                       sucursal: int = 1,
+                       fuerza_venta: int = 1,
                        modo_atencion: int = 0,
-                       ruta: int = 0,
-                       anulado: bool = False) -> Union[List[Dict[str, Any]], Dict[str, Any]]:
+                       anulado: bool = False):
         """
         Busca rutas de venta SIN validación (raw JSON).
         """
         params = {
-            "sucursal": sucursal if sucursal > 0 else "",
-            "fuerzaventa": fuerza_venta if fuerza_venta > 0 else "",
-            "modoatencion": modo_atencion if modo_atencion > 0 else "",
-            "ruta": ruta if ruta > 0 else "",
+            "sucursal": sucursal,
+            "fuerzaventa": fuerza_venta,
             "anulada": str(anulado).lower()  # PDF dice "anulada" en query param pg 36
         }
         return self._get("rutasVenta/", params)
 
     def get_routes(self,
-                   sucursal: int = 0,
-                   fuerza_venta: int = 0,
-                   modo_atencion: int = 0,
-                   ruta: int = 0,
+                   sucursal: int = 1,
+                   fuerza_venta: int = 1,
+                   modo_atencion: str = "PRE",
                    anulado: bool = False) -> List[RutaVenta]:
         """
         Busca rutas de venta validadas con Pydantic.
         """
-        raw_data = self.get_routes_raw(sucursal, fuerza_venta, modo_atencion, ruta, anulado)
+        raw_data = self.get_routes_raw(sucursal=sucursal, 
+                                       fuerza_venta=fuerza_venta,
+                                       anulado=anulado)
         # Extraer lista de rutas del JSON
         # Estructura probable: {"rutasVenta": [...]} o {"RutasVenta": {"eRutas": [...]}}
-        if isinstance(raw_data, dict):
             # Intentar diferentes estructuras posibles
-            if 'rutasVenta' in raw_data:
-                routes_list = raw_data.get('rutasVenta', [])
-            elif 'RutasVenta' in raw_data:
-                routes_list = raw_data.get('RutasVenta', {})
-                if isinstance(routes_list, dict):
-                    routes_list = routes_list.get('eRutas', [])
-            elif 'error' in raw_data:
-                logger.warning(f"API retornó error en rutas: {raw_data.get('error')}")
-                return []
-            else:
-                routes_list = []
-        else:
-            routes_list = raw_data
+        routes_list = raw_data.get('RutasVenta')
+        routes_list =  routes_list.get('eRutasVenta')
+        #logger.debug(f"List to get parsed: {routes_list['eRutasVenta']}")
         return self._parse_list(routes_list, RutaVenta)
 
     # --- Marketing ---
@@ -533,7 +528,6 @@ class ChessClient:
         return self._parse_list(segmentos_list, JerarquiaMkt)
 
     # --- Reportes ---
-
     def export_sales_report(self, 
                             fecha_desde: str, 
                             fecha_hasta: str, 

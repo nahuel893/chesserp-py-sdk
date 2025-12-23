@@ -3,6 +3,8 @@ from src.client import ChessClient
 from src.exceptions import AuthError, ApiError
 from src.logger import setup_logger, get_logger
 from datetime import date, datetime, timedelta
+import calendar
+
 import csv
 import os
 
@@ -41,7 +43,7 @@ class Testing:
             logger.error(f"Error instanciando el cliente de ChessERP: {error}")
             raise
 
-    def _to_csv(self, data, filename: str = "output.csv"):
+    def to_csv(self, data, filename: str = "output.csv"):
         """
         Exporta datos a CSV.
 
@@ -143,7 +145,7 @@ class Testing:
                 'semana_entrega': ruta.semana_entrega,
                 'dias_entrega': ruta.dias_entrega,
             }
-            if not ruta.cliente_rutas:
+            if ruta.cliente_rutas:
                 flat.append({**ruta_base, 'cli_id_cliente': None, 'cli_razon_social': None,
                             'cli_intercalacion_visita': None, 'cli_intercalacion_entrega': None})
                 continue
@@ -162,54 +164,191 @@ class Testing:
     def _flatten_clients(self, data) -> list:
         """
         Aplana Cliente → ClienteAlias → CliFuerza.
-        Una fila por cada combinación Cliente/Alias/Fuerza.
+        Una fila por cliente, con múltiples columnas numeradas para cada fuerza.
+        Incluye TODOS los campos del modelo Cliente.
+
+        NOTA: Primero determina el máximo número de fuerzas para asegurar
+        que todos los rows tengan las mismas columnas en el CSV.
         """
+        if not data:
+            return []
+
+        # Primer paso: encontrar el máximo número de fuerzas
+        max_fuerzas = max(len(cliente.clifuerza) if cliente.clifuerza else 0 for cliente in data)
+        logger.debug(f"Máximo número de fuerzas encontrado: {max_fuerzas}")
+
+        # Campos de fuerza que necesitamos en todas las filas
+        fuerza_fields = [
+            'id_sucursal', 'id_cliente', 'id_fuerza_ventas', 'des_fuerza_venta',
+            'id_modo_atencion', 'des_modo_atencion', 'fecha_inicio_fuerza',
+            'fecha_fin_fuerza', 'id_ruta', 'fecha_ruta_venta', 'anulado',
+            'periodicidad_visita', 'semana_visita', 'dias_visita',
+            'intercalacion_visita', 'perioricidad_entrega', 'semana_entrega',
+            'dias_entrega', 'intercalacion_entrega', 'horarios',
+        ]
+
         flat = []
         for cliente in data:
+            # Cliente base - TODOS los campos del modelo Cliente
             cli_base = {
+                # Identificación Sucursal/Cliente
                 'id_sucursal': cliente.id_sucursal,
                 'des_sucursal': cliente.des_sucursal,
                 'id_cliente': cliente.id_cliente,
                 'fecha_alta': cliente.fecha_alta,
                 'anulado': cliente.anulado,
+                'fecha_baja': cliente.fecha_baja,
+
+                # Datos Comerciales
+                'id_alias_vigente': cliente.id_alias_vigente,
                 'id_forma_pago': cliente.id_forma_pago,
                 'des_forma_pago': cliente.des_forma_pago,
+                'plazo_pago': cliente.plazo_pago,
                 'id_lista_precio': cliente.id_lista_precio,
                 'des_lista_precio': cliente.des_lista_precio,
-                'calle': cliente.calle,
-                'des_localidad': cliente.des_localidad,
+
+                # Comprobantes y Límites
+                'id_comprobante': cliente.id_comprobante,
+                'des_comprobante': cliente.des_comprobante,
+                'limite_importe': cliente.limite_importe,
+                'id_art_limite': cliente.id_art_limite,
+                'des_art_limite': cliente.des_art_limite,
+                'cant_art_limite': cliente.cant_art_limite,
+                'cpbtes_impagos': cliente.cpbtes_impagos,
+                'dias_deuda_vencida': cliente.dias_deuda_vencida,
+
+                # Ubicación Principal
+                'id_pais': cliente.id_pais,
+                'id_provincia': cliente.id_provincia,
                 'des_provincia': cliente.des_provincia,
+                'id_departamento': cliente.id_departamento,
+                'des_departamento': cliente.des_departamento,
+                'id_localidad': cliente.id_localidad,
+                'des_localidad': cliente.des_localidad,
+                'calle': cliente.calle,
+                'altura': cliente.altura,
+                'entre_calle_1': cliente.entre_calle_1,
+                'entre_calle_2': cliente.entre_calle_2,
+                'comentario': cliente.comentario,
+                'longitud_geo': cliente.longitud_geo,
+                'latitud_geo': cliente.latitud_geo,
+                'horario': cliente.horario,
+
+                # Ubicación Entrega
+                'id_localidad_entrega': cliente.id_localidad_entrega,
+                'des_localidad_entrega': cliente.des_localidad_entrega,
+                'calle_entrega': cliente.calle_entrega,
+                'altura_entrega': cliente.altura_entrega,
+                'piso_depto_entrega': cliente.piso_depto_entrega,
+                'entre_calle_1_entrega': cliente.entre_calle_1_entrega,
+                'entre_calle_2_entrega': cliente.entre_calle_2_entrega,
+                'comentario_entrega': cliente.comentario_entrega,
+                'longitud_geo_entrega': cliente.longitud_geo_entrega,
+                'latitud_geo_entrega': cliente.latitud_geo_entrega,
+                'horario_entrega': cliente.horario_entrega,
+
+                # Contacto
+                'telefono_fijo': cliente.telefono_fijo,
                 'telefono_movil': cliente.telefono_movil,
                 'email': cliente.email,
-                'des_canal_mkt': cliente.des_canal_mkt,
+                'comentario_adicional': cliente.comentario_adicional,
+
+                # Comisiones
+                'id_comision_venta': cliente.id_comision_venta,
+                'des_comision_venta': cliente.des_comision_venta,
+                'id_comision_flete': cliente.id_comision_flete,
+                'des_comision_flete': cliente.des_comision_flete,
+                'porcentaje_flete': cliente.porcentaje_flete,
+
+                # Marketing (TODOS los campos)
+                'id_subcanal_mkt': cliente.id_subcanal_mkt,
                 'des_subcanal_mkt': cliente.des_subcanal_mkt,
+                'id_canal_mkt': cliente.id_canal_mkt,
+                'des_canal_mkt': cliente.des_canal_mkt,
+                'id_segmento_mkt': cliente.id_segmento_mkt,
+                'des_segmento_mkt': cliente.des_segmento_mkt,
+                'id_ramo': cliente.id_ramo,
+                'des_ramo': cliente.des_ramo,
+                'id_area': cliente.id_area,
+                'des_area': cliente.des_area,
+                'id_agrupacion': cliente.id_agrupacion,
+                'des_agrupacion': cliente.des_agrupacion,
+
+                # Marketing - Atributos adicionales
+                'es_potencial': cliente.es_potencial,
+                'es_cuenta_y_orden': cliente.es_cuenta_y_orden,
+                'id_ocasion_consumo': cliente.id_ocasion_consumo,
+                'des_ocasion_consumo': cliente.des_ocasion_consumo,
+                'id_subcategoria_foco': cliente.id_subcategoria_foco,
+                'des_subcategoria_foco': cliente.des_subcategoria_foco,
+                'foco_trade': cliente.foco_trade,
+                'foco_ventas': cliente.foco_ventas,
+                'cluster_ventas': cliente.cluster_ventas,
+
+                # Aplanando alias
+                'alias_id_alias': cliente.cliente_alias[0].id_alias if cliente.cliente_alias else None,
+                'alias_razon_social': cliente.cliente_alias[0].razon_social if cliente.cliente_alias else None,
+                'alias_fantasia_social': cliente.cliente_alias[0].fantasia_social if cliente.cliente_alias else None,
+                'alias_identificador': cliente.cliente_alias[0].identificador if cliente.cliente_alias else None,
+                'alias_id_tipo_contribuyente': cliente.cliente_alias[0].id_tipo_contribuyente if cliente.cliente_alias else None,
+                'alias_des_tipo_contribuyente': cliente.cliente_alias[0].des_tipo_contribuyente if cliente.cliente_alias else None,
+                'alias_fecha_hora_alta': cliente.cliente_alias[0].fecha_hora_alta if cliente.cliente_alias else None,
+                'alias_anulado': cliente.cliente_alias[0].anulado if cliente.cliente_alias else None,
             }
-            if not cliente.cliente_alias:
-                flat.append({**cli_base, 'alias_id_alias': None, 'alias_razon_social': None,
-                            'alias_identificador': None, 'fuerza_id_fuerza_ventas': None,
-                            'fuerza_des_fuerza_venta': None, 'fuerza_id_ruta': None})
-                continue
-            for alias in cliente.cliente_alias:
-                alias_base = {
-                    **cli_base,
-                    'alias_id_alias': alias.id_alias,
-                    'alias_razon_social': alias.razon_social,
-                    'alias_identificador': alias.identificador,
-                    'alias_tipo_contribuyente': alias.des_tipo_contribuyente,
-                }
-                if not alias.clifuerza:
-                    flat.append({**alias_base, 'fuerza_id_fuerza_ventas': None,
-                                'fuerza_des_fuerza_venta': None, 'fuerza_id_ruta': None})
-                    continue
-                for fuerza in alias.clifuerza:
-                    flat.append({
-                        **alias_base,
-                        'fuerza_id_fuerza_ventas': fuerza.id_fuerza_ventas,
-                        'fuerza_des_fuerza_venta': fuerza.des_fuerza_venta,
-                        'fuerza_id_modo_atencion': fuerza.id_modo_atencion,
-                        'fuerza_id_ruta': fuerza.id_ruta,
-                        'fuerza_anulado': fuerza.anulado,
+
+            # Agregar campos para todas las fuerzas (1 a max_fuerzas)
+            for i in range(1, max_fuerzas + 1):
+                # Si el cliente tiene la fuerza número i, agregar sus valores
+                if cliente.clifuerza and i <= len(cliente.clifuerza):
+                    fuerza = cliente.clifuerza[i - 1]  # i-1 porque las listas son 0-indexed
+                    cli_base.update({
+                        f'fuerza_id_sucursal{i}': fuerza.id_sucursal,
+                        f'fuerza_id_cliente{i}': fuerza.id_cliente,
+                        f'fuerza_id_fuerza_ventas{i}': fuerza.id_fuerza_ventas,
+                        f'fuerza_des_fuerza_venta{i}': fuerza.des_fuerza_venta,
+                        f'fuerza_id_modo_atencion{i}': fuerza.id_modo_atencion,
+                        f'fuerza_des_modo_atencion{i}': fuerza.des_modo_atencion,
+                        f'fuerza_fecha_inicio_fuerza{i}': fuerza.fecha_inicio_fuerza,
+                        f'fuerza_fecha_fin_fuerza{i}': fuerza.fecha_fin_fuerza,
+                        f'fuerza_id_ruta{i}': fuerza.id_ruta,
+                        f'fuerza_fecha_ruta_venta{i}': fuerza.fecha_ruta_venta,
+                        f'fuerza_anulado{i}': fuerza.anulado,
+                        f'fuerza_periodicidad_visita{i}': fuerza.periodicidad_visita,
+                        f'fuerza_semana_visita{i}': fuerza.semana_visita,
+                        f'fuerza_dias_visita{i}': fuerza.dias_visita,
+                        f'fuerza_intercalacion_visita{i}': fuerza.intercalacion_visita,
+                        f'fuerza_perioricidad_entrega{i}': fuerza.perioricidad_entrega,
+                        f'fuerza_semana_entrega{i}': fuerza.semana_entrega,
+                        f'fuerza_dias_entrega{i}': fuerza.dias_entrega,
+                        f'fuerza_intercalacion_entrega{i}': fuerza.intercalacion_entrega,
+                        f'fuerza_horarios{i}': fuerza.horarios,
                     })
+                else:
+                    # Si no tiene esa fuerza, rellenar con None
+                    cli_base.update({
+                        f'fuerza_id_sucursal{i}': None,
+                        f'fuerza_id_cliente{i}': None,
+                        f'fuerza_id_fuerza_ventas{i}': None,
+                        f'fuerza_des_fuerza_venta{i}': None,
+                        f'fuerza_id_modo_atencion{i}': None,
+                        f'fuerza_des_modo_atencion{i}': None,
+                        f'fuerza_fecha_inicio_fuerza{i}': None,
+                        f'fuerza_fecha_fin_fuerza{i}': None,
+                        f'fuerza_id_ruta{i}': None,
+                        f'fuerza_fecha_ruta_venta{i}': None,
+                        f'fuerza_anulado{i}': None,
+                        f'fuerza_periodicidad_visita{i}': None,
+                        f'fuerza_semana_visita{i}': None,
+                        f'fuerza_dias_visita{i}': None,
+                        f'fuerza_intercalacion_visita{i}': None,
+                        f'fuerza_perioricidad_entrega{i}': None,
+                        f'fuerza_semana_entrega{i}': None,
+                        f'fuerza_dias_entrega{i}': None,
+                        f'fuerza_intercalacion_entrega{i}': None,
+                        f'fuerza_horarios{i}': None,
+                    })
+
+            flat.append(cli_base)
         return flat
 
     def _flatten_orders(self, data) -> list:
@@ -375,7 +514,7 @@ class Testing:
 
             if data:
                 logger.debug(f"Primer registro: {data[0]}")
-                self._to_csv(data, 'test_stock.csv')
+                self.to_csv(data, 'test_stock.csv')
             return data
 
         return self._test_wrapper("Stock (StockFisico)", _test)
@@ -383,14 +522,12 @@ class Testing:
     def sales(self):
         """Test del modelo Sale (Ventas)."""
         def _test():
-            # Usar fechas del mes anterior para tener datos
-            # fecha_hasta = date.today()
-            # fecha_desde = fecha_hasta - timedelta(days=2)
-
-            fecha_hasta = date(2025, 12, 3)
-            fecha_desde = date(2025, 12, 1)
-
-
+            # Get Sales full month
+            hoy = date.today()
+            fecha_desde = date(hoy.year, hoy.month, 1)
+            dias_en_mes = calendar.monthrange(fecha_desde.year, fecha_desde.month)[1]
+            fecha_hasta = date(hoy.year, hoy.month, dias_en_mes)
+        
             logger.info(f"Obteniendo ventas desde {fecha_desde} hasta {fecha_hasta}...")
             data = self.client.get_sales(
                 fecha_desde=fecha_desde.strftime("%Y-%m-%d"),
@@ -406,7 +543,7 @@ class Testing:
                 #flat_data = self._flatten_sales(data)
                 flat_data = data
                 logger.info(f"Registros aplanados (venta+líneas): {len(flat_data)}")
-                self._to_csv(flat_data, 'test_sales.csv')
+                self.to_csv(flat_data, 'test_sales.csv')
             return data
 
         return self._test_wrapper("Sales (Ventas)", _test)
@@ -423,7 +560,7 @@ class Testing:
                 # Aplanar Artículo → Agrupaciones → Envases
                 flat_data = self._flatten_articles(data)
                 logger.info(f"Registros aplanados (art+agrup+env): {len(flat_data)}")
-                self._to_csv(flat_data, 'test_articles.csv')
+                self.to_csv(flat_data, 'test_articles.csv')
             return data
 
         return self._test_wrapper("Articles (Artículos)", _test)
@@ -432,15 +569,16 @@ class Testing:
         """Test del modelo RutaVenta."""
         def _test():
             logger.info("Obteniendo rutas de venta...")
-            data = self.client.get_routes(anulado=False)
+            data = self.client.get_routes(sucursal=1, anulado=False)
             logger.info(f"Rutas obtenidas: {len(data)}")
 
             if data:
                 logger.debug(f"Primera ruta: {data[0]}")
                 # Aplanar Ruta → Clientes
-                flat_data = self._flatten_routes(data)
+                flat_data = data
+                #flat_data = self._flatten_routes(data)
                 logger.info(f"Registros aplanados (ruta+clientes): {len(flat_data)}")
-                self._to_csv(flat_data, 'test_routes.csv')
+                self.to_csv(flat_data, 'test_routes.csv')
             return data
 
         return self._test_wrapper("Routes (RutaVenta)", _test)
@@ -464,7 +602,7 @@ class Testing:
                 # Aplanar Pedido → Líneas
                 flat_data = self._flatten_orders(data)
                 logger.info(f"Registros aplanados (pedido+líneas): {len(flat_data)}")
-                self._to_csv(flat_data, 'test_orders.csv')
+                self.to_csv(flat_data, 'test_orders.csv')
             return data
 
         return self._test_wrapper("Orders (Pedidos)", _test)
@@ -473,7 +611,7 @@ class Testing:
         """Test del modelo Cliente."""
         def _test():
             logger.info("Obteniendo clientes...")
-            data = self.client.get_customers()
+            data = self.client.get_customers(nro_lote=0)
             logger.info(f"Clientes obtenidos: {len(data)}")
 
             if data:
@@ -481,7 +619,7 @@ class Testing:
                 # Aplanar Cliente → Alias → Fuerza
                 flat_data = self._flatten_clients(data)
                 logger.info(f"Registros aplanados (cliente+alias+fuerza): {len(flat_data)}")
-                self._to_csv(flat_data, 'test_clients.csv')
+                self.to_csv(flat_data, 'test_clients.csv')
             return data
 
         return self._test_wrapper("Clients (Clientes)", _test)
@@ -495,7 +633,7 @@ class Testing:
 
             if data:
                 logger.debug(f"Primer personal: {data[0]}")
-                self._to_csv(data, 'test_staff.csv')
+                self.to_csv(data, 'test_staff.csv')
             return data
 
         return self._test_wrapper("Staff (PersonalComercial)", _test)
@@ -518,7 +656,7 @@ class Testing:
                 # Aplanar Segmento → Canal → Subcanal
                 flat_data = self._flatten_marketing(data)
                 logger.info(f"Registros aplanados (seg+canal+subcanal): {len(flat_data)}")
-                self._to_csv(flat_data, 'test_marketing.csv')
+                self.to_csv(flat_data, 'test_marketing.csv')
             else:
                 logger.warning("No se obtuvieron datos de marketing")
             return data

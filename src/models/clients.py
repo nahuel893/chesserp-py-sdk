@@ -12,29 +12,29 @@ class ClienteAlias(BaseModel):
     anulado: Optional[bool] = Field(None, alias="anulado")
     
     # Datos Persona
-    id_tipo_persona: Optional[int] = Field(None, alias="idTipoPersona")
+    id_tipo_persona: Optional[Union[str, int]] = Field(None, alias="idTipoPersona")  # API retorna strings como 'PJ'
     apellido_paterno: Optional[str] = Field(None, alias="apellidoPaterno")
     apellido_materno: Optional[str] = Field(None, alias="apellidoMaterno")
     nombres: Optional[str] = Field(None, alias="nombres")
     razon_social: Optional[str] = Field(None, alias="razonSocial")
     fantasia_social: Optional[str] = Field(None, alias="fantasiaSocial")
-    
+
     # Contribuyente
-    id_tipo_contribuyente: Optional[int] = Field(None, alias="idTipoContribuyente")
+    id_tipo_contribuyente: Optional[Union[str, int]] = Field(None, alias="idTipoContribuyente")  # API retorna strings como 'CF'
     des_tipo_contribuyente: Optional[str] = Field(None, alias="desTipoContribuyente")
     id_tipo_identificador: Optional[int] = Field(None, alias="idTipoIdentificador")
     des_tipo_identificador: Optional[str] = Field(None, alias="desTipoIdentificador")
     identificador: Optional[int] = Field(None, alias="identificador") # CUIT/DNI
-    vencimiento_identificador: Optional[int] = Field(None, alias="vencimientoIdentificador")
+    vencimiento_identificador: Optional[str] = Field(None, alias="vencimientoIdentificador")  # API retorna fechas como '1999-01-01'
     
     # Impuestos
     es_exento_iibb: Optional[bool] = Field(None, alias="esExentoIibb")
     fecha_vencimiento_exencion_iibb: Optional[str] = Field(None, alias="fechaVencimientoExencionIibb")
     es_inscripto_iibb: Optional[bool] = Field(None, alias="esInscriptoIibb")
-    numero_inscripcion_iibb: Optional[int] = Field(None, alias="numeroInscripcionIibb")
+    numero_inscripcion_iibb: Optional[Union[str, int]] = Field(None, alias="numeroInscripcionIibb")  # API retorna strings vacíos
     es_agente_percepcion_iibb: Optional[bool] = Field(None, alias="esAgentePercepcionIibb")
     es_convenio_multilateral: Optional[bool] = Field(None, alias="esConvenioMultilateral")
-    provincias_cm05: Optional[int] = Field(None, alias="provinciasCm05")
+    provincias_cm05: Optional[Union[str, int]] = Field(None, alias="provinciasCm05")  # API retorna strings vacíos
     
     # Otros
     permiso_venta_alcohol: Optional[bool] = Field(None, alias="permisoVentaAlcohol")
@@ -43,7 +43,6 @@ class ClienteAlias(BaseModel):
     es_mipyme: Optional[bool] = Field(None, alias="esMipyme")
     
     # Recursión extraña en HTML: clienteAlias tiene array "Clifuerza"
-    clifuerza: Optional[List["ClienteFuerza"]] = Field(None, alias="Clifuerza")
 
 class ClienteFuerza(BaseModel):
     """
@@ -54,7 +53,7 @@ class ClienteFuerza(BaseModel):
     id_cliente: Optional[int] = Field(None, alias="idCliente")
     id_fuerza_ventas: Optional[int] = Field(None, alias="idFuerzaVentas")
     des_fuerza_venta: Optional[str] = Field(None, alias="desFuerzaVenta")
-    id_modo_atencion: Optional[int] = Field(None, alias="idModoAtencion")
+    id_modo_atencion: Optional[Union[str, int]] = Field(None, alias="idModoAtencion")  # API retorna strings como 'PRE'
     des_modo_atencion: Optional[str] = Field(None, alias="desModoAtencion")
     
     fecha_inicio_fuerza: Optional[str] = Field(None, alias="fechaInicioFuerza")
@@ -66,12 +65,12 @@ class ClienteFuerza(BaseModel):
     
     periodicidad_visita: Optional[int] = Field(None, alias="periodicidadVisita")
     semana_visita: Optional[int] = Field(None, alias="semanaVisita")
-    dias_visita: Optional[int] = Field(None, alias="diasVisita")
+    dias_visita: Optional[Union[str, int, float]] = Field(None, alias="diasVisita")  # API retorna strings vacíos o decimales como '2,5'
     intercalacion_visita: Optional[int] = Field(None, alias="intercalacionVisita")
-    
+
     perioricidad_entrega: Optional[int] = Field(None, alias="perioricidadEntrega")
     semana_entrega: Optional[int] = Field(None, alias="semanaEntrega")
-    dias_entrega: Optional[int] = Field(None, alias="diasEntrega")
+    dias_entrega: Optional[Union[str, int]] = Field(None, alias="diasEntrega")  # API retorna strings vacíos
     intercalacion_entrega: Optional[int] = Field(None, alias="intercalacionEntrega")
     
     horarios: Optional[str] = Field(None, alias="Horarios")
@@ -175,4 +174,7 @@ class Cliente(BaseModel):
     cluster_ventas: Optional[Union[str, int]] = Field(None, alias="clusterVentas")  # API retorna strings o ints
     
     # Relaciones
-    cliente_alias: Optional[List[ClienteAlias]] = Field(None, alias="cliente alias")
+    cliente_alias: Optional[List[ClienteAlias]] = Field(None, alias="eClialias")
+
+    # En la documentacion se marca este campo dentro de ClienteAlias, pero testeando el endpoint no es asi
+    clifuerza: Optional[List["ClienteFuerza"]] = Field(None, alias="eClifuerza")
