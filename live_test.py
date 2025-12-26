@@ -1,18 +1,22 @@
 # Local Imports
-from src.client import ChessClient
-from src.exceptions import AuthError, ApiError
-from src.logger import setup_logger, get_logger
+from chesserp.client import ChessClient
+from chesserp.exceptions import AuthError, ApiError
+from chesserp.logger import setup_logger, get_logger
 from datetime import date, datetime, timedelta
+from typing import Optional
+from dotenv import load_dotenv
 import calendar
-
 import csv
 import os
 
-# Configurar logger globalmente al inicio (capturará logs de src.client también)
+load_dotenv()
+
+# Configurar logger globalmente al inicio
 logger = setup_logger(log_file="live_test.log")
 
 # Directorio de salida para archivos
 OUTPUT_DIR = "data/out"
+
 
 class Testing:
     """
@@ -20,12 +24,13 @@ class Testing:
     Ejecuta pruebas contra la API real y exporta resultados a CSV.
     """
 
-    def __init__(self, instance: str = 'b'):
+    def __init__(self, client: Optional[ChessClient] = None, env_prefix: str = ""):
         """
         Inicializa la clase de pruebas.
 
         Args:
-            instance: Instancia de ChessERP a usar ('b' o 's')
+            client: Instancia de ChessClient (opcional, si no se pasa se crea desde env)
+            env_prefix: Prefijo para variables de entorno (ej: "EMPRESA1_")
         """
         logger.info(f'{"":=^60}')
         logger.info(f'{"INICIANDO TESTING CLASS":^60}')
@@ -36,8 +41,13 @@ class Testing:
         logger.debug(f"Directorio de salida: {OUTPUT_DIR}")
 
         try:
-            logger.info(f"Instanciando ChessClient (instance={instance})...")
-            self.client = ChessClient(instance=instance)
+            if client:
+                self.client = client
+                logger.info("Cliente recibido por parámetro")
+            else:
+                # Crear cliente desde variables de entorno
+                logger.info(f"Creando ChessClient desde env (prefix={env_prefix})...")
+                self.client = ChessClient.from_env(prefix=env_prefix)
             logger.info("Cliente instanciado correctamente")
         except Exception as error:
             logger.error(f"Error instanciando el cliente de ChessERP: {error}")
@@ -728,16 +738,19 @@ class Testing:
 def main():
     """
     Punto de entrada principal para ejecutar las pruebas en vivo.
+
+    Uso:
+        python live_test.py --prefix EMPRESA1_ --test sales
+        python live_test.py --test all  # usa variables sin prefijo (API_URL, USERNAME, PASSWORD)
     """
     import argparse
 
     parser = argparse.ArgumentParser(description='Pruebas en vivo de ChessERP API')
     parser.add_argument(
-        '--instance', '-i',
+        '--prefix', '-p',
         type=str,
-        default='b',
-        choices=['b', 's'],
-        help='Instancia de ChessERP a usar (default: b)'
+        default='',
+        help='Prefijo para variables de entorno (ej: EMPRESA1_). Default: sin prefijo'
     )
     parser.add_argument(
         '--test', '-t',
@@ -752,11 +765,11 @@ def main():
     logger.info(f'{"":═^60}')
     logger.info(f'{"LIVE TEST - ChessERP API":^60}')
     logger.info(f'{"":═^60}')
-    logger.info(f"Instancia: {args.instance}")
+    logger.info(f"Prefix: {args.prefix or '(ninguno)'}")
     logger.info(f"Test: {args.test}")
 
-    # Inicializar clase de pruebas
-    tester = Testing(instance=args.instance)
+    # Inicializar clase de pruebas con prefijo de variables de entorno
+    tester = Testing(env_prefix=args.prefix)
 
     # Ejecutar test(s) seleccionado(s)
     if args.test == 'all':

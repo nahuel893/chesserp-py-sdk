@@ -170,8 +170,9 @@ class StockData:
 if __name__ == "__main__":
     # Ejemplo de uso
     try:
-        # Inicializar cliente (toma credenciales de .env)
-        client = ChessClient(instance='s') 
+        # Inicializar cliente desde variables de entorno
+        # Requiere: API_URL, USERNAME, PASSWORD en .env
+        client = ChessClient.from_env()
         stock_manager = StockData(client)
         
         # Cargar metadatos (paths ficticios, ajustar según entorno real)

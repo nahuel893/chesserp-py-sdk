@@ -2,8 +2,8 @@ import os
 import sys
 import logging
 from dotenv import load_dotenv
-from src.client import ChessClient
-from src.exceptions import ChessError
+from chesserp.client import ChessClient
+from chesserp.exceptions import ChessError
 
 # Configurar log para ver info útil pero no saturar
 logging.basicConfig(level=logging.WARNING, format='%(levelname)s: %(message)s')
@@ -126,10 +126,12 @@ def test_marketing(client):
 
 def main():
     load_dotenv()
-    
-    print("\nInicializando cliente ChessERP (Instancia 'b')...")
+
+    print("\nInicializando cliente ChessERP...")
     try:
-        client = ChessClient(instance='b')
+        # Crear cliente desde variables de entorno
+        # Requiere: API_URL, USERNAME, PASSWORD en .env
+        client = ChessClient.from_env()
         client.login()
         print("✅ Login exitoso.\n")
     except Exception as e:

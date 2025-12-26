@@ -6,8 +6,7 @@ from typing import List, Optional, Dict, Any, Union
 from urllib.parse import urljoin
 from dotenv import load_dotenv
 
-# Local imports 
-from chesserp.config.settings import Settings, get_settings
+# Local imports
 from chesserp.exceptions import AuthError, ApiError, ChessError
 from chesserp.models.sales import Sale
 from chesserp.models.inventory import Articulo, StockFisico
@@ -22,40 +21,121 @@ from chesserp.logger import get_logger
 logger = get_logger(__name__)
 
 load_dotenv()
+
+# Paths por defecto de la API ChessERP
+DEFAULT_API_PATH = "/web/api/chess/v1/"
+DEFAULT_LOGIN_PATH = "/web/api/chess/v1/auth/login"
+
+
 class ChessClient:
     """
     Cliente principal para la API de ChessERP.
     Maneja autenticación y llamadas a endpoints.
+
+    Uso:
+        # Directo con credenciales
+        client = ChessClient(
+            api_url="https://api.empresa.com",
+            username="usuario",
+            password="clave"
+        )
+
+        # Desde variables de entorno con prefijo
+        client = ChessClient.from_env(prefix="CHESS_EMPRESA1_")
+        # Lee: CHESS_EMPRESA1_API_URL, CHESS_EMPRESA1_USERNAME, CHESS_EMPRESA1_PASSWORD
     """
 
-    def __init__(self, settings: Optional[Settings] = None, instance: str = 'b'):
+    def __init__(
+        self,
+        api_url: str,
+        username: str,
+        password: str,
+        api_path: str = DEFAULT_API_PATH,
+        login_path: str = DEFAULT_LOGIN_PATH,
+        timeout: int = 30,
+        name: Optional[str] = None
+    ):
         """
-        Inicializa el cliente.
-        
-        Args:
-            settings: Instancia de configuración (opcional).
-            instance: 'b' o 's' para seleccionar la instancia configurada en .env
-        """
-        self.settings = settings or get_settings()
-        self.config = self.settings.get_instance_config(instance)
-        
-        # No usamos requests.Session para tener control explícito sobre las cookies en cada request
-        self.base_headers = {}
+        Inicializa el cliente con credenciales directas.
 
-        self.base_url = str(self.config.api_url) + self.settings.api_path
-        self.auth_url = str(self.config.api_url) + self.settings.api_path_login
+        Args:
+            api_url: URL base de la API (ej: "https://api.chesserp.com")
+            username: Usuario para autenticación
+            password: Contraseña para autenticación
+            api_path: Path base de la API (default: /web/api/chess/v1/)
+            login_path: Path de login (default: /web/api/chess/v1/auth/login)
+            timeout: Timeout en segundos para requests
+            name: Nombre opcional para identificar esta instancia en logs
+        """
+        self.api_url = api_url.rstrip('/')
+        self.username = username
+        self.password = password
+        self.api_path = api_path
+        self.login_path = login_path.rstrip('/')
+        self.timeout = timeout
+        self.name = name or api_url
+
+        # Headers y estado de sesión
+        self.base_headers = {}
+        self.base_url = self.api_url + self.api_path
+        self.auth_url = self.api_url + self.login_path
         self._session_id: Optional[str] = None
         self.cookies = None
+
+    @classmethod
+    def from_env(cls, prefix: str = "", env_file: Optional[str] = None) -> "ChessClient":
+        """
+        Crea un cliente desde variables de entorno.
+
+        Args:
+            prefix: Prefijo para las variables (ej: "CHESS_PROD_" busca
+                    CHESS_PROD_API_URL, CHESS_PROD_USERNAME, CHESS_PROD_PASSWORD)
+            env_file: Ruta opcional a archivo .env
+
+        Returns:
+            ChessClient configurado
+
+        Example:
+            # .env contiene:
+            # EMPRESA1_API_URL=https://api1.com
+            # EMPRESA1_USERNAME=user1
+            # EMPRESA1_PASSWORD=pass1
+
+            client = ChessClient.from_env(prefix="EMPRESA1_")
+        """
+        if env_file:
+            load_dotenv(env_file)
+
+        api_url = os.getenv(f"{prefix}API_URL")
+        username = os.getenv(f"{prefix}USERNAME")
+        password = os.getenv(f"{prefix}PASSWORD")
+
+        if not all([api_url, username, password]):
+            missing = []
+            if not api_url:
+                missing.append(f"{prefix}API_URL")
+            if not username:
+                missing.append(f"{prefix}USERNAME")
+            if not password:
+                missing.append(f"{prefix}PASSWORD")
+            raise ValueError(f"Variables de entorno faltantes: {', '.join(missing)}")
+
+        return cls(
+            api_url=api_url,
+            username=username,
+            password=password,
+            name=prefix.rstrip('_') if prefix else None
+        )
 
     def login(self) -> str:
         """
         Realiza el login y almacena el sessionId.
         """
         credentials = {
-            "usuario": self.config.username,
-            "password": self.config.password
+            "usuario": self.username,
+            "password": self.password
         }
-        logger.info(f"Authenticating as {self.config.username}...")
+        logger.info(f"[{self.name}] Authenticating as {self.username}...")
         
         try:
             # Usar requests.post directamente, no una sesión persistente
@@ -570,43 +650,38 @@ class ChessClient:
             "pcTipo": "D"
         }
 
-        logger.info(f"Requesting sales report export: {fecha_desde} to {fecha_hasta}...")
-        
+        logger.info(f"[{self.name}] Requesting sales report export: {fecha_desde} to {fecha_hasta}...")
+
         try:
             # Paso 1: Solicitar exportación
-            response = self.session.post(url, json=payload, timeout=self.config.timeout)
-            
+            response = requests.post(url, json=payload, headers=self.base_headers, timeout=self.timeout)
+
             if response.status_code == 401:
                 self.login()
-                response = self.session.post(url, json=payload, timeout=self.config.timeout)
-                
+                response = requests.post(url, json=payload, headers=self.base_headers, timeout=self.timeout)
+
             if response.status_code != 200:
                 raise ApiError(response.status_code, "Failed to request report export", response.text)
-                
+
             data = response.json()
             pc_archivo = data.get("pcArchivo")
-            
+
             if not pc_archivo:
                 raise ApiError(500, "API response missing 'pcArchivo' field")
-                
+
             # Paso 2: Descargar archivo
-            # pcArchivo suele venir como ruta relativa tipo "/temp/archivo.xls" o similar.
-            # La base_path original en endpoints.py era baseURL sin /web/api...
-            # Asumiremos que pcArchivo es relativo a la raíz del servidor web.
-            # self.config.api_url es "http://host:port"
-            
-            # Limpiamos slashes para evitar dobles
-            file_url = f"{str(self.config.api_url).rstrip('/')}/{pc_archivo.lstrip('/')}"
-            
-            logger.info(f"Downloading report from {file_url}...")
-            
-            file_response = self.session.get(file_url, timeout=self.config.timeout)
-            
+            # pcArchivo viene como ruta relativa tipo "/temp/archivo.xls"
+            file_url = f"{self.api_url}/{pc_archivo.lstrip('/')}"
+
+            logger.info(f"[{self.name}] Downloading report from {file_url}...")
+
+            file_response = requests.get(file_url, headers=self.base_headers, timeout=self.timeout)
+
             if file_response.status_code != 200:
                 raise ApiError(file_response.status_code, "Failed to download report file", file_response.text)
-                
+
             return file_response.content
-            
+
         except requests.RequestException as e:
             raise ApiError(500, f"Connection error during report export: {str(e)}")
 

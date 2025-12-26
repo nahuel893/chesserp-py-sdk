@@ -1,12 +1,22 @@
-from src.client import ChessClient
+import os
+from dotenv import load_dotenv
+from chesserp.client import ChessClient
 from live_test import Testing
 from datetime import date
 from calendar import monthrange
 import pandas as pd
 
-# Instanciar cliente y helper de testing (para usar _flatten_sales)
-chess_client = ChessClient(instance='b')
-test = Testing(instance='b')
+load_dotenv()
+
+# Instanciar cliente con credenciales de .env
+# Formato legacy: API_URL_B, USERNAME_B, PASSWORD_B
+chess_client = ChessClient(
+    api_url=os.getenv("API_URL_B"),
+    username=os.getenv("USERNAME_B"),
+    password=os.getenv("PASSWORD_B"),
+    name="empresa_b"
+)
+test = Testing(client=chess_client)
 
 # Lista para acumular todos los registros aplanados
 all_sales = []
