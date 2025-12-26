@@ -523,11 +523,13 @@ class Testing:
         """Test del modelo Sale (Ventas)."""
         def _test():
             # Get Sales full month
-            hoy = date.today()
-            fecha_desde = date(hoy.year, hoy.month, 1)
-            dias_en_mes = calendar.monthrange(fecha_desde.year, fecha_desde.month)[1]
-            fecha_hasta = date(hoy.year, hoy.month, dias_en_mes)
-        
+        #     hoy = date.today()
+        #     fecha_desde = date(hoy.year, hoy.month, 1)
+        #     dias_en_mes = calendar.monthrange(fecha_desde.year, fecha_desde.month)[1]
+        #     fecha_hasta = date(hoy.year, hoy.month, dias_en_mes)
+            fecha_desde = date(2025, 12, 1)
+            fecha_hasta = date(2025, 12, 31)
+
             logger.info(f"Obteniendo ventas desde {fecha_desde} hasta {fecha_hasta}...")
             data = self.client.get_sales(
                 fecha_desde=fecha_desde.strftime("%Y-%m-%d"),

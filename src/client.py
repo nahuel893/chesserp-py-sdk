@@ -177,7 +177,7 @@ class ChessClient:
                   fecha_hasta: str,
                   empresas: str = "",
                   detallado: bool = False,
-                  ) -> List[Sale]:
+                  ) -> List[Sale]
         """
         Obtiene comprobantes de ventas validados con Pydantic (todos los lotes).
         """
@@ -203,7 +203,7 @@ class ChessClient:
             match = re.search(r'(\d+)/(\d+)', cant_comprobantes_str)
             if match:
                 lote_actual = int(match.group(1))
-                total_lotes = int(match.group(2))
+                total_lotes = int(str(match.group(2)).replace('.', ''))
                 logger.info(f"Total de lotes a procesar: {total_lotes}")
 
                 # Iterar sobre los lotes restantes (si hay más de 1)
@@ -215,7 +215,7 @@ class ChessClient:
 
                         if list_ is not None:
                             sales_data.extend(self._parse_list(list_, Sale))
-                            logger.info(f"Lote {i} procesado: {len(list_)} registros")
+                            logger.info(f"Lote {i}/{total_lotes} procesado: {len(list_)} registros")
             else:
                 logger.warning(f"No se pudo parsear total de lotes de: {cant_comprobantes_str}. Asumiendo 1 lote.")
 
