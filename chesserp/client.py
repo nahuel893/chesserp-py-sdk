@@ -257,9 +257,17 @@ class ChessClient:
                   fecha_hasta: str,
                   empresas: str = "",
                   detallado: bool = False,
-                  ) -> List[Sale]:
+                  raw: bool = False
+                  ) -> Union[List[Sale], List[Dict[str, Any]]]:
         """
-        Obtiene comprobantes de ventas validados con Pydantic (todos los lotes).
+        Obtiene comprobantes de ventas (todos los lotes).
+
+        Args:
+            fecha_desde: Fecha inicio (formato API)
+            fecha_hasta: Fecha fin (formato API)
+            empresas: Filtro de empresas
+            detallado: Nivel de detalle
+            raw: Si True, retorna lista de dicts sin validar. Si False, retorna List[Sale]
         """
         # Primera request para obtener el primer lote y el total de lotes
         response_data = self.get_sales_raw(fecha_desde, fecha_hasta, empresas, detallado, nro_lote=1)
@@ -272,7 +280,10 @@ class ChessClient:
             sales_list = response_data.get("dsReporteComprobantesApi", {}).get("VentasResumen")
 
             if sales_list is not None:
-                sales_data.extend(self._parse_list(sales_list, Sale))
+                if raw:
+                    sales_data.extend(sales_list)
+                else:
+                    sales_data.extend(self._parse_list(sales_list, Sale))
                 logger.info(f"Lote 1 procesado: {len(sales_list)} registros")
 
             # Obtener el total de lotes usando regex
@@ -294,7 +305,10 @@ class ChessClient:
                         list_ = response_data.get("dsReporteComprobantesApi", {}).get("VentasResumen")
 
                         if list_ is not None:
-                            sales_data.extend(self._parse_list(list_, Sale))
+                            if raw:
+                                sales_data.extend(list_)
+                            else:
+                                sales_data.extend(self._parse_list(list_, Sale))
                             logger.info(f"Lote {i}/{total_lotes} procesado: {len(list_)} registros")
             else:
                 logger.warning(f"No se pudo parsear total de lotes de: {cant_comprobantes_str}. Asumiendo 1 lote.")
@@ -327,13 +341,15 @@ class ChessClient:
 
     def get_articles(self,
                      articulo: int = 0,
-                     anulado: bool = False) -> List[Articulo]:
+                     anulado: bool = False,
+                     raw: bool = False) -> Union[List[Articulo], List[Dict[str, Any]]]:
         """
-        Obtiene catálogo de artículos validados con Pydantic (todos los lotes).
+        Obtiene catálogo de artículos (todos los lotes).
 
         Args:
             articulo: ID específico (0 para todos)
             anulado: Incluir anulados
+            raw: Si True, retorna lista de dicts sin validar. Si False, retorna List[Articulo]
         """
         # Primera request para obtener el primer lote y el total de lotes
         response_data = self.get_articles_raw(articulo, nro_lote=1, anulado=anulado)
@@ -346,7 +362,10 @@ class ChessClient:
             articles_list = response_data.get("Articulos", {}).get("eArticulos")
 
             if articles_list is not None:
-                articles_data.extend(self._parse_list(articles_list, Articulo))
+                if raw:
+                    articles_data.extend(articles_list)
+                else:
+                    articles_data.extend(self._parse_list(articles_list, Articulo))
                 logger.info(f"Lote 1 procesado: {len(articles_list)} artículos")
 
             # Obtener el total de lotes usando regex
@@ -368,7 +387,10 @@ class ChessClient:
                         list_ = response_data.get("Articulos", {}).get("eArticulos")
 
                         if list_ is not None:
-                            articles_data.extend(self._parse_list(list_, Articulo))
+                            if raw:
+                                articles_data.extend(list_)
+                            else:
+                                articles_data.extend(self._parse_list(list_, Articulo))
                             logger.info(f"Lote {i} procesado: {len(list_)} artículos")
             else:
                 logger.warning(f"No se pudo parsear total de lotes de: {cant_articulos_str}. Asumiendo 1 lote.")
@@ -393,16 +415,21 @@ class ChessClient:
     def get_stock(self,
                   id_deposito: int,
                   frescura: bool = False,
-                  fecha: str = "") -> List[StockFisico]:
+                  fecha: str = "",
+                  raw: bool = False) -> Union[List[StockFisico], List[Dict[str, Any]]]:
         """
-        Obtiene stock físico validado con Pydantic.
+        Obtiene stock físico.
+
         Args:
             id_deposito: Obligatorio
             frescura: Apertura por frescura
             fecha: DD-MM-AAAA (Opcional, cálculo histórico)
+            raw: Si True, retorna lista de dicts sin validar. Si False, retorna List[StockFisico]
         """
         raw_data = self.get_stock_raw(id_deposito, fecha)
-        raw_data = raw_data.get('dsStockFisicoApi').get("dsStock") # retorna la lista de articulos
+        raw_data = raw_data.get('dsStockFisicoApi').get("dsStock")  # retorna la lista de articulos
+        if raw:
+            return raw_data
         return self._parse_list(raw_data, StockFisico)
 
     # --- Clientes ---
@@ -428,23 +455,32 @@ class ChessClient:
     
     def get_customers(self,
                       anulado: bool = False,
-                      nro_lote: int = 0) -> List[Cliente]:
+                      nro_lote: int = 0,
+                      raw: bool = False) -> Union[List[Cliente], List[Dict[str, Any]]]:
         """
-        Busca clientes validados con Pydantic.
+        Busca clientes (todos los lotes o uno específico).
+
+        Args:
+            anulado: Incluir anulados
+            nro_lote: Lote específico (0 para todos)
+            raw: Si True, retorna lista de dicts sin validar. Si False, retorna List[Cliente]
         """
         # Inicializar lista acumuladora
         customers_data = []
 
         if nro_lote == 0:
             # Primera request  para obtener el primer lote y el total de lotes
-            response_data = self.get_customers_raw( nro_lote=1)
+            response_data = self.get_customers_raw(nro_lote=1)
 
             # Extraer el primer lote de datos
             if isinstance(response_data, dict):
                 customers_list = response_data.get("Clientes", {}).get("eClientes")
 
                 if customers_list is not None:
-                    customers_data.extend(self._parse_list(customers_list, Cliente))
+                    if raw:
+                        customers_data.extend(customers_list)
+                    else:
+                        customers_data.extend(self._parse_list(customers_list, Cliente))
                     logger.info(f"Lote 1 procesado: {len(customers_list)} registros")
 
                 # Obtener el total de lotes usando regex
@@ -460,13 +496,16 @@ class ChessClient:
 
                     # Iterar sobre los lotes restantes (si hay más de 1)
                     for i in range(lote_actual+1, total_lotes+1):
-                        response_data = self.get_customers_raw( nro_lote=1)
+                        response_data = self.get_customers_raw(nro_lote=i)
 
                         if isinstance(response_data, dict):
                             list_ = response_data.get("Clientes", {}).get("eClientes")
 
                             if list_ is not None:
-                                customers_data.extend(self._parse_list(list_, Cliente))
+                                if raw:
+                                    customers_data.extend(list_)
+                                else:
+                                    customers_data.extend(self._parse_list(list_, Cliente))
                                 logger.info(f"Lote {i} procesado: {len(list_)} registros")
                 else:
                     logger.warning(f"No se pudo parsear total de lotes de: {cant_clientes_str}. Asumiendo 1 lote.")
@@ -477,7 +516,10 @@ class ChessClient:
             list_ = response_data.get("Clientes", {}).get("eClientes")
 
             if list_ is not None:
-                customers_data.extend(self._parse_list(list_, Cliente))
+                if raw:
+                    customers_data.extend(list_)
+                else:
+                    customers_data.extend(self._parse_list(list_, Cliente))
                 logger.info(f"Lote {nro_lote} procesado: {len(list_)} registros")
 
         return customers_data
@@ -502,18 +544,23 @@ class ChessClient:
     def get_orders(self,
                    fecha_entrega: str = "",
                    fecha_pedido: str = "",
-                   facturado: bool = False) -> List[Pedido]:
+                   facturado: bool = False,
+                   raw: bool = False) -> Union[List[Pedido], List[Dict[str, Any]]]:
         """
-        Busca pedidos validados con Pydantic.
+        Busca pedidos.
+
         Args:
             fecha_entrega: Fecha de entrega
             fecha_pedido: Fecha de alta
             facturado: Filtrar facturados
+            raw: Si True, retorna lista de dicts sin validar. Si False, retorna List[Pedido]
         """
         raw_data = self.get_orders_raw(fecha_entrega, fecha_pedido, facturado)
         # Extraer lista de pedidos del JSON
         # Estructura: {"pedidos": [...]}
         pedidos_list = raw_data.get('pedidos', []) if isinstance(raw_data, dict) else raw_data
+        if raw:
+            return pedidos_list
         return self._parse_list(pedidos_list, Pedido)
 
     # --- Personal ---
@@ -532,14 +579,22 @@ class ChessClient:
 
     def get_staff(self,
                   sucursal: int = 0,
-                  personal: int = 0) -> List[PersonalComercial]:
+                  personal: int = 0,
+                  raw: bool = False) -> Union[List[PersonalComercial], List[Dict[str, Any]]]:
         """
-        Busca personal comercial validado con Pydantic.
+        Busca personal comercial.
+
+        Args:
+            sucursal: ID de sucursal (0 para todas)
+            personal: ID de personal (0 para todos)
+            raw: Si True, retorna lista de dicts sin validar. Si False, retorna List[PersonalComercial]
         """
         raw_data = self.get_staff_raw(sucursal, personal)
         # Extraer lista de personal del JSON
         # Estructura: {"PersonalComercial": {"ePersCom": [...]}}
         staff_list = raw_data.get('PersonalComercial', {}).get('ePersCom', []) if isinstance(raw_data, dict) else raw_data
+        if raw:
+            return staff_list
         return self._parse_list(staff_list, PersonalComercial)
 
     # --- Rutas ---
@@ -563,19 +618,28 @@ class ChessClient:
                    sucursal: int = 1,
                    fuerza_venta: int = 1,
                    modo_atencion: str = "PRE",
-                   anulado: bool = False) -> List[RutaVenta]:
+                   anulado: bool = False,
+                   raw: bool = False) -> Union[List[RutaVenta], List[Dict[str, Any]]]:
         """
-        Busca rutas de venta validadas con Pydantic.
+        Busca rutas de venta.
+
+        Args:
+            sucursal: ID de sucursal
+            fuerza_venta: ID de fuerza de venta
+            modo_atencion: Modo de atención
+            anulado: Incluir anuladas
+            raw: Si True, retorna lista de dicts sin validar. Si False, retorna List[RutaVenta]
         """
-        raw_data = self.get_routes_raw(sucursal=sucursal, 
+        raw_data = self.get_routes_raw(sucursal=sucursal,
                                        fuerza_venta=fuerza_venta,
                                        anulado=anulado)
         # Extraer lista de rutas del JSON
         # Estructura probable: {"rutasVenta": [...]} o {"RutasVenta": {"eRutas": [...]}}
-            # Intentar diferentes estructuras posibles
+        # Intentar diferentes estructuras posibles
         routes_list = raw_data.get('RutasVenta')
-        routes_list =  routes_list.get('eRutasVenta')
-        #logger.debug(f"List to get parsed: {routes_list['eRutasVenta']}")
+        routes_list = routes_list.get('eRutasVenta')
+        if raw:
+            return routes_list
         return self._parse_list(routes_list, RutaVenta)
 
     # --- Marketing ---
@@ -594,17 +658,21 @@ class ChessClient:
         return self._get("jerarquiaMkt/", params)
 
     def get_marketing(self,
-                      cod_scan: int = 0) -> List[JerarquiaMkt]:
+                      cod_scan: int = 0,
+                      raw: bool = False) -> Union[List[JerarquiaMkt], List[Dict[str, Any]]]:
         """
-        Busca jerarquía de marketing validada con Pydantic.
+        Busca jerarquía de marketing.
 
         Args:
             cod_scan: Código de escaneo (opcional, 0 para todos)
+            raw: Si True, retorna lista de dicts sin validar. Si False, retorna List[JerarquiaMkt]
         """
         raw_data = self.get_marketing_raw(cod_scan)
         # Extraer lista de segmentos del JSON anidado
         # Estructura: {"SubcanalesMkt": {"SegmentosMkt": [...]}}
         segmentos_list = raw_data.get('SubcanalesMkt', {}).get('SegmentosMkt', [])
+        if raw:
+            return segmentos_list
         return self._parse_list(segmentos_list, JerarquiaMkt)
 
     # --- Reportes ---
