@@ -470,7 +470,7 @@ class ChessClient:
 
         if nro_lote == 0:
             # Primera request  para obtener el primer lote y el total de lotes
-            response_data = self.get_customers_raw(nro_lote=1)
+            response_data = self.get_customers_raw(anulado=anulado, nro_lote=1)
 
             # Extraer el primer lote de datos
             if isinstance(response_data, dict):
@@ -583,7 +583,6 @@ class ChessClient:
                   raw: bool = False) -> Union[List[PersonalComercial], List[Dict[str, Any]]]:
         """
         Busca personal comercial.
-
         Args:
             sucursal: ID de sucursal (0 para todas)
             personal: ID de personal (0 para todos)

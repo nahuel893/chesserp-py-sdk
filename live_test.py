@@ -537,8 +537,8 @@ class Testing:
         #     fecha_desde = date(hoy.year, hoy.month, 1)
         #     dias_en_mes = calendar.monthrange(fecha_desde.year, fecha_desde.month)[1]
         #     fecha_hasta = date(hoy.year, hoy.month, dias_en_mes)
-            fecha_desde = date(2025, 12, 1)
-            fecha_hasta = date(2025, 12, 31)
+            fecha_desde = date(2026, 1, 1)
+            fecha_hasta = date(2026, 1, 31)
 
             logger.info(f"Obteniendo ventas desde {fecha_desde} hasta {fecha_hasta}...")
             data = self.client.get_sales(
