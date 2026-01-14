@@ -191,7 +191,7 @@ class ChessClient:
                 response = requests.get(url, params=params, headers=headers)
 
             if response.status_code != 200:
-                raise apierror(response.status_code, f"request to {endpoint} failed", response.text)
+                raise ApiError(response.status_code, f"request to {endpoint} failed", response.text)
 
             json_data = response.json()
         #    logger.debug(f"{json_data}")
