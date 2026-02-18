@@ -1,33 +1,34 @@
 # ChessERP API Python Library
 
-[![Python Version](https://img.shields.io/badge/python-3.8%2B-blue.svg)](https://www.python.org/downloads/)
+[![Python Version](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/downloads/)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
-Librería Python robusta y reutilizable para interactuar con la API de ChessERP. Abstrae la complejidad de la autenticación, manejo de sesiones y paginación automática, permitiendo a los desarrolladores trabajar con objetos Python tipados y validados.
+Libreria Python robusta y reutilizable para interactuar con la API de ChessERP. Abstrae la complejidad de la autenticacion, manejo de sesiones y paginacion automatica, permitiendo a los desarrolladores trabajar con objetos Python tipados y validados.
 
-## Características Principales
+## Caracteristicas Principales
 
 - **Cliente Unificado**: Interfaz simple para acceder a todos los endpoints de ChessERP
-- **Validación Automática**: Modelos Pydantic para garantizar integridad de datos
-- **Manejo de Sesiones**: Autenticación automática con reintentos en caso de expiración
-- **Paginación Transparente**: Obtención automática de todos los lotes de datos
-- **Tipado Estático**: Soporte completo para autocompletado en IDEs
-- **Métodos Raw & Parsed**: Acceso a datos crudos (JSON) o validados (Pydantic)
-- **Logging Integrado**: Trazabilidad completa de operaciones
+- **Validacion Automatica**: Modelos Pydantic v2 para garantizar integridad de datos
+- **Manejo de Sesiones**: Autenticacion automatica con reintentos en caso de expiracion (401)
+- **Paginacion Transparente**: Obtencion automatica de todos los lotes de datos
+- **Tipado Estatico**: Soporte completo para autocompletado en IDEs
+- **Metodos Raw & Parsed**: Acceso a datos crudos (JSON) o validados (Pydantic)
+- **Logging Integrado**: Trazabilidad completa de operaciones (file + console)
 
 ## Endpoints Soportados
 
-| Recurso | Descripción | Métodos |
-|---------|-------------|---------|
-| **Ventas** | Comprobantes de ventas (facturas, tickets) | `get_sales()`, `get_sales_raw()`, `export_sales_report()` |
-| **Inventario** | Catálogo de artículos y stock físico | `get_articles()`, `get_stock()` |
-| **Clientes** | Base de datos de clientes | `get_customers()` |
-| **Pedidos** | Pedidos de venta | `get_orders()` |
-| **Personal** | Personal comercial (vendedores) | `get_staff()` |
-| **Rutas** | Rutas de venta | `get_routes()` |
-| **Marketing** | Jerarquía de marketing (segmentos, canales) | `get_marketing()` |
+| Recurso | Metodos | Paginado |
+|---------|---------|----------|
+| **Ventas** | `get_sales()`, `get_sales_raw()`, `export_sales_report()` | Si |
+| **Articulos** | `get_articles()`, `get_articles_raw()` | Si |
+| **Stock** | `get_stock()`, `get_stock_raw()` | No |
+| **Clientes** | `get_customers()`, `get_customers_raw()` | Si |
+| **Pedidos** | `get_orders()`, `get_orders_raw()` | No |
+| **Personal Comercial** | `get_staff()`, `get_staff_raw()` | No |
+| **Rutas de Venta** | `get_routes()`, `get_routes_raw()` | No |
+| **Marketing** | `get_marketing()`, `get_marketing_raw()` | No |
 
-## Instalación
+## Instalacion
 
 ### Clonar el Repositorio
 
@@ -36,57 +37,60 @@ git clone https://github.com/tuusuario/chesserp-api.git
 cd chesserp-api
 ```
 
-### Instalar Dependencias
+### Instalar
 
 ```bash
-pip install -r requirements.txt
+pip install -e .          # Modo desarrollo (editable)
+pip install -e ".[dev]"   # Con dependencias de testing
 ```
 
-### Configuración
+### Configuracion
 
-Crea un archivo `.env` en la raíz del proyecto con tus credenciales:
+Copia el archivo de ejemplo y completa con tus credenciales:
+
+```bash
+cp .env.example .env
+```
+
+El `.env` usa un patron de prefijos por empresa:
 
 ```env
-# Instancia B (Producción)
-API_URL_B=http://tu-servidor:puerto
-USERNAME_B=tu_usuario
-PASSWORD_B=tu_contraseña
+# Empresa 1
+EMPRESA1_API_URL=http://tu-servidor:puerto/
+EMPRESA1_USERNAME=tu_usuario
+EMPRESA1_PASSWORD=tu_password
 
-# Instancia S (Staging/Testing)
-API_URL_S=http://tu-servidor-staging:puerto
-USERNAME_S=tu_usuario_staging
-PASSWORD_S=tu_contraseña_staging
+# Empresa 2 (opcional)
+EMPRESA2_API_URL=http://otro-servidor:puerto/
+EMPRESA2_USERNAME=tu_usuario
+EMPRESA2_PASSWORD=tu_password
 ```
 
-## Uso Rápido
+## Uso Rapido
 
-### Inicialización del Cliente
+### Inicializacion del Cliente
 
 ```python
-from src.client import ChessClient
+from chesserp import ChessClient
 
-# Usar instancia configurada (default: 'b')
-client = ChessClient(instance='b')
+# Desde variables de entorno con prefijo
+client = ChessClient.from_env(prefix="EMPRESA1_")
 
-# O con configuración manual
-from src.config.settings import Settings
-
-settings = Settings(
-    api_url_b="http://mi-servidor:8080",
-    username_b="usuario",
-    password_b="contraseña"
+# O directo con credenciales
+client = ChessClient(
+    api_url="http://tu-servidor:puerto",
+    username="usuario",
+    password="clave"
 )
-client = ChessClient(settings=settings, instance='b')
 ```
 
 ### Consultar Ventas
 
 ```python
-# Obtener ventas validadas (Pydantic)
 ventas = client.get_sales(
     fecha_desde="2025-01-01",
     fecha_hasta="2025-01-31",
-    detallado=True  # Incluir líneas de detalle
+    detallado=True
 )
 
 for venta in ventas:
@@ -94,7 +98,6 @@ for venta in ventas:
     print(f"Cliente: {venta.nombre_cliente}")
     print(f"Total: ${venta.imp_total}")
 
-    # Acceder a líneas de detalle
     for linea in venta.lines:
         print(f"  - {linea.ds_articulo} x{linea.cantidad_solicitada}")
 ```
@@ -102,20 +105,15 @@ for venta in ventas:
 ### Consultar Stock
 
 ```python
-# Obtener stock físico de un depósito
-stock = client.get_stock(
-    id_deposito=1,
-    fecha="01-01-2025"  # Opcional: cálculo histórico
-)
+stock = client.get_stock(id_deposito=1)
 
 for item in stock:
     print(f"{item.ds_articulo}: {item.cant_bultos} bultos")
 ```
 
-### Exportar Reporte de Ventas
+### Exportar Reporte de Ventas a Excel
 
 ```python
-# Generar y descargar reporte Excel
 excel_bytes = client.export_sales_report(
     fecha_desde="2025-01-01",
     fecha_hasta="2025-01-31",
@@ -123,215 +121,127 @@ excel_bytes = client.export_sales_report(
     tiposdoc="FCVTA,DVVTA"
 )
 
-# Guardar archivo
 with open("reporte_ventas.xlsx", "wb") as f:
     f.write(excel_bytes)
 ```
 
 ### Acceso a Datos Raw (JSON)
 
-Para pipelines ETL o arquitecturas medallion:
+Para pipelines ETL o cuando se necesita el JSON sin validar:
 
 ```python
-# Obtener primer lote sin validación
 raw_data = client.get_sales_raw(
     fecha_desde="2025-01-01",
     fecha_hasta="2025-01-31",
     nro_lote=1
 )
-
-# Estructura:
-# {
-#   "dsReporteComprobantesApi": {"VentasResumen": [...]},
-#   "cantComprobantesVentas": "Numero de lote obtenido: 1/70. ..."
-# }
 ```
 
-## Ejemplos Completos
+Todos los metodos `get_*()` aceptan `raw=True` para retornar listas de dicts en vez de objetos Pydantic.
 
-### Consultar Clientes por Sucursal
-
-```python
-clientes = client.get_customers(sucursal=1, anulado=False)
-
-for cliente in clientes:
-    print(f"ID: {cliente.id_cliente}")
-    print(f"Razón Social: {cliente.razon_social}")
-    print(f"Ubicación: {cliente.des_localidad}, {cliente.des_provincia}")
-```
-
-### Obtener Rutas de Venta
+### Mas Ejemplos
 
 ```python
-rutas = client.get_routes(
-    sucursal=1,
-    fuerza_venta=10,
-    anulado=False
-)
+# Clientes
+clientes = client.get_customers(anulado=False)
 
-for ruta in rutas:
-    print(f"Ruta: {ruta.des_ruta}")
-    print(f"Vendedor: {ruta.des_personal}")
-```
+# Pedidos
+pedidos = client.get_orders(fecha_pedido="2025-01-15")
 
-### Jerarquía de Marketing
+# Personal comercial
+personal = client.get_staff(sucursal=1)
 
-```python
+# Rutas de venta
+rutas = client.get_routes(sucursal=1, fuerza_venta=10)
+
+# Jerarquia de marketing
 segmentos = client.get_marketing(cod_scan=0)
-
-for segmento in segmentos:
-    print(f"Segmento: {segmento.des_segmento_mkt}")
-    print(f"Código: {segmento.cod_segmento_mkt}")
-```
-
-## Estructura del Proyecto
-
-```
-chesserp-api/
-├── src/
-│   ├── client.py              # Cliente principal (ChessClient)
-│   ├── logger.py              # Configuración de logging
-│   ├── exceptions.py          # Excepciones personalizadas
-│   ├── config/
-│   │   └── settings.py        # Gestión de configuración (.env)
-│   └── models/                # Modelos Pydantic
-│       ├── sales.py           # Modelo de ventas
-│       ├── inventory.py       # Modelos de artículos y stock
-│       ├── clients.py         # Modelo de clientes
-│       ├── orders.py          # Modelo de pedidos
-│       ├── routes.py          # Modelo de rutas de venta
-│       ├── staff.py           # Modelo de personal comercial
-│       └── marketing.py       # Modelo de jerarquía marketing
-├── tests/
-│   ├── conftest.py           # Fixtures de pytest
-│   └── test_client.py        # Tests unitarios
-├── usage_example.py          # Script de ejemplo interactivo
-├── live_test.py              # Tests contra API real
-├── requirements.txt          # Dependencias del proyecto
-├── CLAUDE.md                 # Contexto del proyecto
-└── README.md                 # Este archivo
-```
-
-## Testing
-
-### Ejecutar Tests Unitarios
-
-```bash
-# Todos los tests
-pytest tests/
-
-# Con cobertura
-pytest tests/ --cov=src
-
-# Tests específicos
-pytest tests/test_client.py -v
-```
-
-### Script de Prueba Interactivo
-
-```bash
-python usage_example.py
-```
-
-Este script proporciona un menú interactivo para probar todos los endpoints disponibles.
-
-## Modelos de Datos
-
-Todos los modelos utilizan **Pydantic v2** para validación automática:
-
-```python
-from src.models.sales import Sale
-from src.models.inventory import Articulo, StockFisico
-from src.models.clients import Cliente
-from src.models.orders import Pedido
-
-# Los modelos incluyen:
-# - Validación de tipos
-# - Campos opcionales claramente definidos
-# - Serialización JSON automática
-# - Autocompletado en IDEs
 ```
 
 ## Manejo de Errores
 
-La librería proporciona excepciones específicas:
-
 ```python
-from src.exceptions import AuthError, ApiError, ChessError
+from chesserp import ChessClient, AuthError, ApiError, ChessError
 
 try:
     ventas = client.get_sales("2025-01-01", "2025-01-31")
 except AuthError as e:
-    print(f"Error de autenticación: {e}")
+    print(f"Error de autenticacion: {e}")
 except ApiError as e:
     print(f"Error en la API: {e.status_code} - {e.message}")
 except ChessError as e:
     print(f"Error general: {e}")
 ```
 
-## Logging
-
-Configurar nivel de logging según necesidad:
-
-```python
-import logging
-from src.logger import get_logger
-
-# Para debug detallado
-logging.basicConfig(level=logging.DEBUG)
-
-# Para uso en producción
-logging.basicConfig(level=logging.WARNING)
-```
-
-## Arquitectura
-
-### Flujo de Ejecución
+## Estructura del Proyecto
 
 ```
-Usuario → ChessClient → Login (si es necesario) → GET Endpoint
-                                                 ↓
-                                            Parse JSON
-                                                 ↓
-                                         Validar con Pydantic
-                                                 ↓
-                                        Retornar Objetos
+chesserp-api/
+├── chesserp/                    # Paquete principal
+│   ├── __init__.py              # Exports: ChessClient, excepciones
+│   ├── client.py                # Cliente principal (auth, paginacion, endpoints)
+│   ├── exceptions.py            # ChessError, AuthError, ApiError
+│   ├── logger.py                # Logger centralizado (file + console)
+│   ├── sales.py                 # Servicio de ventas
+│   ├── stock.py                 # Servicio de stock (pandas)
+│   ├── config/
+│   │   └── settings.py          # PathConfig, LogLevel, Settings
+│   └── models/                  # Modelos Pydantic v2
+│       ├── __init__.py          # Re-exports de todos los modelos
+│       ├── sales.py             # Sale
+│       ├── inventory.py         # Articulo, StockFisico
+│       ├── clients.py           # Cliente
+│       ├── orders.py            # Pedido, LineaPedido
+│       ├── routes.py            # RutaVenta, ClienteRuta
+│       ├── staff.py             # PersonalComercial
+│       └── marketing.py         # JerarquiaMkt, CanalMkt, SubCanalMkt
+├── live_test.py                 # Tests contra API real
+├── usage_example.py             # Menu interactivo de pruebas
+├── main.py                      # Script batch de exportacion
+├── pyproject.toml               # Config de proyecto y dependencias
+├── requirements.txt             # Dependencias
+└── .env.example                 # Plantilla de variables de entorno
 ```
 
-### Características Técnicas
+## Scripts de Prueba
 
-- **Reintentos Automáticos**: Si una petición falla con 401, se reintenta el login automáticamente
-- **Paginación Automática**: Los métodos `get_*()` (sin `_raw`) obtienen TODOS los lotes disponibles
-- **Parseo Robusto**: Si un registro individual falla la validación, se loguea el error y se continúa con el resto
-- **Configuración por Instancia**: Soporte para múltiples instancias de ChessERP (producción, staging, etc.)
+### Testing contra API real
+
+```bash
+python live_test.py --prefix EMPRESA1_ --test all
+python live_test.py --prefix EMPRESA1_ --test sales
+python live_test.py --test quick
+```
+
+### Menu interactivo
+
+```bash
+python usage_example.py
+```
+
+## Dependencias
+
+| Paquete | Uso |
+|---------|-----|
+| `requests` | HTTP client |
+| `python-dotenv` | Variables de entorno desde .env |
+| `pydantic` | Validacion de modelos |
+| `pandas` | Manipulacion de datos |
+| `openpyxl` | Export Excel |
+| `numpy` | Operaciones numericas |
 
 ## Roadmap
 
 - [ ] Empaquetado PyPI (`pip install chesserp-api`)
 - [ ] Soporte para operaciones POST/PUT (crear pedidos, actualizar stock)
-- [ ] Caché de resultados con TTL configurable
+- [ ] Cache de resultados con TTL configurable
 - [ ] Async support (httpx)
 - [ ] CLI para operaciones comunes
-- [ ] Documentación Sphinx completa
-
-## Contribución
-
-Las contribuciones son bienvenidas. Por favor:
-
-1. Fork el proyecto
-2. Crea una rama para tu feature (`git checkout -b feature/nueva-funcionalidad`)
-3. Commit tus cambios (`git commit -m 'Agrega nueva funcionalidad'`)
-4. Push a la rama (`git push origin feature/nueva-funcionalidad`)
-5. Abre un Pull Request
 
 ## Licencia
 
-Este proyecto está bajo la licencia MIT. Ver archivo `LICENSE` para más detalles.
-
-## Soporte
-
-Para reportar bugs o solicitar features, abre un issue en el repositorio de GitHub.
+Este proyecto esta bajo la licencia MIT. Ver archivo `LICENSE` para mas detalles.
 
 ---
 
-**Desarrollado con Python 3.8+ | Pydantic v2 | Requests**
+**Python 3.10+ | Pydantic v2 | Requests**
