@@ -155,7 +155,7 @@ class Testing:
                 'semana_entrega': ruta.semana_entrega,
                 'dias_entrega': ruta.dias_entrega,
             }
-            if ruta.cliente_rutas:
+            if not ruta.cliente_rutas:
                 flat.append({**ruta_base, 'cli_id_cliente': None, 'cli_razon_social': None,
                             'cli_intercalacion_visita': None, 'cli_intercalacion_entrega': None})
                 continue
