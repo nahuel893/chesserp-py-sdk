@@ -7,8 +7,14 @@ __pycache__/
 .env/
 node_modules/
 .DS_Store
-*.xlsx
-*.xls
-*.csv
-*.txt
+*.egg-info/
+dist/
+build/
 
+# Data files
+data/*.xlsx
+data/*.xls
+data/*.csv
+data/*.txt
+tests/*.xlsx
+tests/*.xls
