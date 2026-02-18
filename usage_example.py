@@ -112,7 +112,7 @@ def test_routes(client):
 def test_marketing(client):
     print_separator("Prueba de Jerarquía Marketing")
     try:
-        mkt = client.get_marketing_hierarchy()
+        mkt = client.get_marketing()
         print(f"✅ Éxito: Se recuperaron {len(mkt)} segmentos.")
         if mkt:
             s = mkt[0]
