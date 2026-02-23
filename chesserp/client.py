@@ -408,7 +408,7 @@ class ChessClient:
         params = {
             "idDeposito": id_deposito,
             #"frescura": str(frescura).lower(),
-            "DD-MM-AAAA": fecha
+            "fechastock": fecha
         }
         return self._get("stock/", params)
 
@@ -423,7 +423,7 @@ class ChessClient:
         Args:
             id_deposito: Obligatorio
             frescura: Apertura por frescura
-            fecha: DD-MM-AAAA (Opcional, cálculo histórico)
+            fecha: fechastock(Opcional, cálculo histórico)
             raw: Si True, retorna lista de dicts sin validar. Si False, retorna List[StockFisico]
         """
         raw_data = self.get_stock_raw(id_deposito, fecha)
