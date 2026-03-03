@@ -496,7 +496,7 @@ class ChessClient:
 
                     # Iterar sobre los lotes restantes (si hay más de 1)
                     for i in range(lote_actual+1, total_lotes+1):
-                        response_data = self.get_customers_raw(nro_lote=i)
+                        response_data = self.get_customers_raw(anulado=anulado, nro_lote=i)
 
                         if isinstance(response_data, dict):
                             list_ = response_data.get("Clientes", {}).get("eClientes")
@@ -512,7 +512,7 @@ class ChessClient:
 
             logger.info(f"Total de clientes obtenidas: {len(customers_data)}")
         else:
-            response_data = self.get_customers_raw(nro_lote=nro_lote)
+            response_data = self.get_customers_raw(anulado=anulado, nro_lote=nro_lote)
             list_ = response_data.get("Clientes", {}).get("eClientes")
 
             if list_ is not None:
