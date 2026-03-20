@@ -5,6 +5,7 @@ from chesserp.models.orders import Pedido
 from chesserp.models.routes import RutaVenta
 from chesserp.models.staff import PersonalComercial
 from chesserp.models.marketing import JerarquiaMkt
+from chesserp.models.pricing import ListaPrecio, PrecioArticulo
 
 __all__ = [
     "Sale",
@@ -15,4 +16,6 @@ __all__ = [
     "RutaVenta",
     "PersonalComercial",
     "JerarquiaMkt",
+    "ListaPrecio",
+    "PrecioArticulo",
 ]
