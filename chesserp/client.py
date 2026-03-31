@@ -635,8 +635,7 @@ class ChessClient:
         # Extraer lista de rutas del JSON
         # Estructura probable: {"rutasVenta": [...]} o {"RutasVenta": {"eRutas": [...]}}
         # Intentar diferentes estructuras posibles
-        routes_list = raw_data.get('RutasVenta')
-        routes_list = routes_list.get('eRutasVenta')
+        routes_list = raw_data.get('RutasVenta', {}).get('eRutasVenta', [])
         if raw:
             return routes_list
         return self._parse_list(routes_list, RutaVenta)
