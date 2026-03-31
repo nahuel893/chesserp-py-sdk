@@ -1,4 +1,4 @@
-"""Tests for ChessWebClient — price lists endpoints."""
+"""Tests for ChessWebClient — price lists endpoints via PricingService."""
 
 import pytest
 import requests_mock as rm
@@ -84,7 +84,7 @@ class TestChessWebClientAuth:
         c = ChessWebClient(api_url=BASE_URL, username="user", password="pass")
         # El auto-login falla porque el mock no da JSESSIONID — AuthError esperado
         with pytest.raises(AuthError):
-            c.get_price_lists()
+            c.pricing.get_lists()
 
     def test_401_triggers_relogin(self, client, mock_api):
         mock_api.get(VIGENCIAS_URL, status_code=401)
@@ -92,11 +92,11 @@ class TestChessWebClientAuth:
         # Simular sesion expirada: borrar la cookie inyectada por el fixture
         client._session.cookies.clear()
         with pytest.raises(AuthError):
-            client.get_price_lists()  # 401 dispara relogin, pero mock POST no da cookie
+            client.pricing.get_lists()  # 401 dispara relogin, pero mock POST no da cookie
 
 
 # ---------------------------------------------------------------------------
-# get_price_lists
+# pricing.get_lists
 # ---------------------------------------------------------------------------
 
 class TestGetPriceLists:
@@ -105,7 +105,7 @@ class TestGetPriceLists:
         listas = [_make_lista(1), _make_lista(2)]
         mock_api.get(VIGENCIAS_URL, json={"eListaPrecios": listas})
 
-        result = client.get_price_lists()
+        result = client.pricing.get_lists()
 
         assert len(result) == 2
         assert all(isinstance(l, ListaPrecio) for l in result)
@@ -118,7 +118,7 @@ class TestGetPriceLists:
         ]
         mock_api.get(VIGENCIAS_URL, json={"eListaPrecios": listas})
 
-        result = client.get_price_lists()
+        result = client.pricing.get_lists()
 
         assert len(result) == 2
         assert all(l.vigente for l in result)
@@ -127,7 +127,7 @@ class TestGetPriceLists:
         listas = [_make_lista(1, vigente=True), _make_lista(2, vigente=False)]
         mock_api.get(VIGENCIAS_URL, json={"eListaPrecios": listas})
 
-        result = client.get_price_lists(solo_vigentes=False)
+        result = client.pricing.get_lists(solo_vigentes=False)
 
         assert len(result) == 2
 
@@ -135,7 +135,7 @@ class TestGetPriceLists:
         listas = [_make_lista(1)]
         mock_api.get(VIGENCIAS_URL, json={"eListaPrecios": listas})
 
-        result = client.get_price_lists(raw=True)
+        result = client.pricing.get_lists(raw=True)
 
         assert isinstance(result[0], dict)
         assert result[0]["listaspre"] == 1
@@ -143,7 +143,7 @@ class TestGetPriceLists:
     def test_empty_response(self, client, mock_api):
         mock_api.get(VIGENCIAS_URL, json={"eListaPrecios": []})
 
-        result = client.get_price_lists()
+        result = client.pricing.get_lists()
 
         assert result == []
 
@@ -151,7 +151,7 @@ class TestGetPriceLists:
         listas = [_make_lista(5, titulo="LISTA MAYORISTA", id_vigencia=999)]
         mock_api.get(VIGENCIAS_URL, json={"eListaPrecios": listas})
 
-        result = client.get_price_lists()
+        result = client.pricing.get_lists()
 
         assert result[0].id_lista == 5
         assert result[0].titulo == "LISTA MAYORISTA"
@@ -159,7 +159,7 @@ class TestGetPriceLists:
 
 
 # ---------------------------------------------------------------------------
-# get_price_list_items
+# pricing.get_items
 # ---------------------------------------------------------------------------
 
 class TestGetPriceListItems:
@@ -168,7 +168,7 @@ class TestGetPriceListItems:
         precios = [_make_precio("A001"), _make_precio("A002")]
         mock_api.get(LISTA_URL, json={"dsPrecios": {"ePrecios": precios}})
 
-        result = client.get_price_list_items(id_lista=1, id_vigencia=100)
+        result = client.pricing.get_items(id_lista=1, id_vigencia=100)
 
         assert len(result) == 2
         assert all(isinstance(p, PrecioArticulo) for p in result)
@@ -177,7 +177,7 @@ class TestGetPriceListItems:
         precios = [_make_precio("A001", precio=50.0, prefin=60.5)]
         mock_api.get(LISTA_URL, json={"dsPrecios": {"ePrecios": precios}})
 
-        result = client.get_price_list_items(id_lista=1, id_vigencia=100)
+        result = client.pricing.get_items(id_lista=1, id_vigencia=100)
 
         assert result[0].cod_articulo == "A001"
         assert result[0].precio == 50.0
@@ -187,7 +187,7 @@ class TestGetPriceListItems:
         precios = [_make_precio("A001")]
         mock_api.get(LISTA_URL, json={"dsPrecios": {"ePrecios": precios}})
 
-        result = client.get_price_list_items(id_lista=1, id_vigencia=100, raw=True)
+        result = client.pricing.get_items(id_lista=1, id_vigencia=100, raw=True)
 
         assert isinstance(result[0], dict)
         assert result[0]["codart"] == "A001"
@@ -195,7 +195,7 @@ class TestGetPriceListItems:
     def test_sends_correct_params(self, client, mock_api):
         mock_api.get(LISTA_URL, json={"dsPrecios": {"ePrecios": []}})
 
-        client.get_price_list_items(id_lista=3, id_vigencia=777)
+        client.pricing.get_items(id_lista=3, id_vigencia=777)
 
         req = mock_api.last_request
         assert req.qs["pilis"] == ["3"]
@@ -205,7 +205,7 @@ class TestGetPriceListItems:
     def test_empty_response(self, client, mock_api):
         mock_api.get(LISTA_URL, json={"dsPrecios": {"ePrecios": []}})
 
-        result = client.get_price_list_items(id_lista=1, id_vigencia=100)
+        result = client.pricing.get_items(id_lista=1, id_vigencia=100)
 
         assert result == []
 
@@ -213,7 +213,7 @@ class TestGetPriceListItems:
         mock_api.get(LISTA_URL, status_code=500, text="error")
 
         with pytest.raises(ApiError) as exc_info:
-            client.get_price_list_items(id_lista=1, id_vigencia=100)
+            client.pricing.get_items(id_lista=1, id_vigencia=100)
 
         assert exc_info.value.status_code == 500
 
