@@ -8,6 +8,14 @@
       "sessions": 3,
       "memories": 4,
       "prompts": 0
+    },
+    {
+      "id": "55affb2f",
+      "created_by": "nahuel",
+      "created_at": "2026-04-01T17:47:25Z",
+      "sessions": 0,
+      "memories": 5,
+      "prompts": 0
     }
   ]
 }
