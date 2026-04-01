@@ -7,9 +7,9 @@ class ListaPrecio(BaseModel):
     Lista de precios con su vigencia activa.
     Ref: Web API - precios/obtenerVigenciasListas -> eListaPrecios
     """
-    id_lista: int = Field(alias="listaspre")
-    titulo: str = Field(alias="titulis")
-    id_vigencia: int = Field(alias="idvigencia")
+    id_lista: Optional[int] = Field(None, alias="listaspre")
+    titulo: Optional[str] = Field(None, alias="titulis")
+    id_vigencia: Optional[int] = Field(None, alias="idvigencia")
     vigente: Optional[bool] = Field(None, alias="vigente")
     fecha_vigencia_desde: Optional[str] = Field(None, alias="fecvigenciadesde")
     fecha_vigencia_hasta: Optional[str] = Field(None, alias="fecvigenciahasta")

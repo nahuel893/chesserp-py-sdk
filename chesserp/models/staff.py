@@ -6,11 +6,11 @@ class PersonalComercial(BaseModel):
     Personal Comercial.
     Ref: HTML defs["personalComercial"]
     """
-    id_sucursal: int = Field(alias="idSucursal")
+    id_sucursal: Optional[int] = Field(None, alias="idSucursal")
     des_sucursal: Optional[str] = Field(None, alias="desSucursal")
-    
-    id_personal: int = Field(alias="idPersonal")
-    des_personal: str = Field(alias="desPersonal")
+
+    id_personal: Optional[int] = Field(None, alias="idPersonal")
+    des_personal: Optional[str] = Field(None, alias="desPersonal")
     
     id_fuerza_ventas: Optional[int] = Field(None, alias="idFuerzaVentas")
     des_fuerza_ventas: Optional[str] = Field(None, alias="desFuerzaVentas")

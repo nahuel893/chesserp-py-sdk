@@ -1,4 +1,4 @@
-"""Tests for get_customers / get_customers_raw."""
+"""Tests for customers service (get / get_raw)."""
 
 import pytest
 
@@ -31,7 +31,7 @@ def _make_response(customers: list, lote_actual: int, total_lotes: int):
 
 
 # ---------------------------------------------------------------------------
-# get_customers — single lote
+# get — single lote
 # ---------------------------------------------------------------------------
 
 class TestGetCustomersSingleLote:
@@ -40,7 +40,7 @@ class TestGetCustomersSingleLote:
         customers = [_make_customer(1), _make_customer(2), _make_customer(3)]
         mock_api.get(CUSTOMERS_URL, json=_make_response(customers, 1, 1))
 
-        result = client.get_customers()
+        result = client.customers.get()
 
         assert len(result) == 3
         assert all(isinstance(c, Cliente) for c in result)
@@ -49,7 +49,7 @@ class TestGetCustomersSingleLote:
         customers = [_make_customer(10), _make_customer(20)]
         mock_api.get(CUSTOMERS_URL, json=_make_response(customers, 1, 1))
 
-        result = client.get_customers()
+        result = client.customers.get()
 
         assert [c.id_cliente for c in result] == [10, 20]
 
@@ -57,7 +57,7 @@ class TestGetCustomersSingleLote:
         customers = [_make_customer(1)]
         mock_api.get(CUSTOMERS_URL, json=_make_response(customers, 1, 1))
 
-        result = client.get_customers(raw=True)
+        result = client.customers.get(raw=True)
 
         assert len(result) == 1
         assert isinstance(result[0], dict)
@@ -66,13 +66,13 @@ class TestGetCustomersSingleLote:
     def test_empty_response(self, client, mock_api):
         mock_api.get(CUSTOMERS_URL, json=_make_response([], 1, 1))
 
-        result = client.get_customers()
+        result = client.customers.get()
 
         assert result == []
 
 
 # ---------------------------------------------------------------------------
-# get_customers — multi lote (pagination)
+# get — multi lote (pagination)
 # ---------------------------------------------------------------------------
 
 class TestGetCustomersMultiLote:
@@ -90,7 +90,7 @@ class TestGetCustomersMultiLote:
             {"json": _make_response(lote3, 3, 3)},
         ])
 
-        result = client.get_customers()
+        result = client.customers.get()
 
         assert len(result) == 5
         assert [c.id_cliente for c in result] == [1, 2, 3, 4, 5]
@@ -104,7 +104,7 @@ class TestGetCustomersMultiLote:
             {"json": _make_response(lote2, 2, 2)},
         ])
 
-        result = client.get_customers(raw=True)
+        result = client.customers.get(raw=True)
 
         assert len(result) == 2
         assert all(isinstance(c, dict) for c in result)
@@ -114,14 +114,14 @@ class TestGetCustomersMultiLote:
         customers = [_make_customer(99)]
         mock_api.get(CUSTOMERS_URL, json=_make_response(customers, 3, 5))
 
-        result = client.get_customers(nro_lote=3)
+        result = client.customers.get(nro_lote=3)
 
         assert len(result) == 1
         assert result[0].id_cliente == 99
 
 
 # ---------------------------------------------------------------------------
-# get_customers — anulado param propagation (hotfix 0.1.1)
+# get — anulado param propagation (hotfix 0.1.1)
 # ---------------------------------------------------------------------------
 
 class TestGetCustomersAnulado:
@@ -136,7 +136,7 @@ class TestGetCustomersAnulado:
             {"json": _make_response(lote2, 2, 2)},
         ])
 
-        client.get_customers(anulado=True)
+        client.customers.get(anulado=True)
 
         # Verify both requests sent anulado=true
         history = mock_api.request_history
@@ -153,7 +153,7 @@ class TestGetCustomersAnulado:
         customers = [_make_customer(1, anulado=True)]
         mock_api.get(CUSTOMERS_URL, json=_make_response(customers, 2, 3))
 
-        client.get_customers(anulado=True, nro_lote=2)
+        client.customers.get(anulado=True, nro_lote=2)
 
         customer_requests = [r for r in mock_api.request_history if "clientes" in r.path]
         assert len(customer_requests) == 1
@@ -163,14 +163,14 @@ class TestGetCustomersAnulado:
         customers = [_make_customer(1)]
         mock_api.get(CUSTOMERS_URL, json=_make_response(customers, 1, 1))
 
-        client.get_customers()
+        client.customers.get()
 
         customer_requests = [r for r in mock_api.request_history if "clientes" in r.path]
         assert customer_requests[0].qs.get("anulado") == ["false"]
 
 
 # ---------------------------------------------------------------------------
-# get_customers — error handling
+# get — error handling
 # ---------------------------------------------------------------------------
 
 class TestGetCustomersErrors:
@@ -184,7 +184,7 @@ class TestGetCustomersErrors:
             {"json": _make_response(customers, 1, 1)},
         ])
 
-        result = client.get_customers()
+        result = client.customers.get()
 
         assert len(result) == 1
 
@@ -194,6 +194,6 @@ class TestGetCustomersErrors:
         mock_api.get(CUSTOMERS_URL, status_code=500, text="Internal Server Error")
 
         with pytest.raises(ApiError) as exc_info:
-            client.get_customers()
+            client.customers.get()
 
         assert exc_info.value.status_code == 500

@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "chesserp-api"
-version = "0.1.2"
+version = "0.2.0"
 description = "Python client library for ChessERP API"
 readme = "README.md"
 license = {text = "MIT"}

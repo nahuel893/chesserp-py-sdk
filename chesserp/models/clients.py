@@ -6,8 +6,8 @@ class ClienteAlias(BaseModel):
     Alias de cliente.
     Ref: HTML defs["clienteAlias"]
     """
-    id_cliente: int = Field(alias="idCliente")
-    id_alias: int = Field(alias="idAlias")
+    id_cliente: Optional[int] = Field(None, alias="idCliente")
+    id_alias: Optional[int] = Field(None, alias="idAlias")
     fecha_hora_alta: Optional[str] = Field(None, alias="fechaHoraAlta")
     anulado: Optional[bool] = Field(None, alias="anulado")
     
@@ -81,9 +81,9 @@ class Cliente(BaseModel):
     Ref: HTML defs["clientes"]
     """
     # Identificación Sucursal/Cliente
-    id_sucursal: int = Field(alias="idSucursal")
+    id_sucursal: Optional[int] = Field(None, alias="idSucursal")
     des_sucursal: Optional[str] = Field(None, alias="desSucursal")
-    id_cliente: int = Field(alias="idCliente")
+    id_cliente: Optional[int] = Field(None, alias="idCliente")
     fecha_alta: Optional[str] = Field(None, alias="fechaAlta")  # API retorna formato: '2021-08-25'
     anulado: Optional[bool] = Field(None, alias="anulado")
     fecha_baja: Optional[str] = Field(None, alias="fechaBaja")
