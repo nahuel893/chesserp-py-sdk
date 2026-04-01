@@ -10,7 +10,7 @@ class AgrupacionArticulo(BaseModel):
     id_forma_agrupar: Optional[str] = Field(None, alias="idFormaAgrupar") # String en HTML
     des_forma_agrupar: Optional[str] = Field(None, alias="desFormaAgrupar")
     id_articulo: Optional[int] = Field(None, alias="idArticulo")
-    id_agrupacion: Optional[int] = Field(None, alias="idAgrupacion")
+    id_agrupacion: Optional[Union[str, int]] = Field(None, alias="idAgrupacion")
     des_agrupacion: Optional[str] = Field(None, alias="desAgrupacion")
     # HTML define una recursión posible o relación anidada de relavacio aquí también?
     # defs["agrupaciones"] tiene propiedad "relavacio" -> items "$ref": "#/components/schemas/relavacio"
