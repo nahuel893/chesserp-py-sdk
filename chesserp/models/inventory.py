@@ -35,8 +35,8 @@ class Articulo(BaseModel):
     Maestro de Artículos.
     Ref: HTML defs["articulos"]
     """
-    id_articulo: int = Field(alias="idArticulo")
-    des_articulo: str = Field(alias="desArticulo")
+    id_articulo: Optional[int] = Field(None, alias="idArticulo")
+    des_articulo: Optional[str] = Field(None, alias="desArticulo")
     desc_detallada: Optional[str] = Field(None, alias="descDetallada")
     unidades_bulto: Optional[int] = Field(None, alias="unidadesBulto")
     anulado: Optional[bool] = Field(None, alias="anulado")
@@ -115,10 +115,10 @@ class StockFisico(BaseModel):
     Ref: HTML defs["stock"] (No visible en el dump truncado, mantengo estructura PDF/General)
     """
     fecha: Optional[str] = Field(None, alias="fecha")
-    id_deposito: int = Field(alias="idDeposito")
+    id_deposito: Optional[int] = Field(None, alias="idDeposito")
     id_almacen: Optional[int] = Field(None, alias="idAlmacen")
-    id_articulo: int = Field(alias="idArticulo")
+    id_articulo: Optional[int] = Field(None, alias="idArticulo")
     ds_articulo: Optional[str] = Field(None, alias="dsArticulo")
     fec_vto_lote: Optional[str] = Field(None, alias="fecVtoLote")
-    cant_bultos: float = Field(alias="cantBultos")
-    cant_unidades: float = Field(alias="cantUnidades")
+    cant_bultos: Optional[float] = Field(None, alias="cantBultos")
+    cant_unidades: Optional[float] = Field(None, alias="cantUnidades")

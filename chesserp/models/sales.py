@@ -70,13 +70,13 @@ class Sale(BaseModel):
     """
     
     # Identificación Empresa/Doc
-    id_empresa: int = Field(alias="idEmpresa")
+    id_empresa: Optional[int] = Field(None, alias="idEmpresa")
     ds_empresa: Optional[str] = Field(None, alias="dsEmpresa")
-    id_documento: Union[int, str] = Field(alias="idDocumento")
+    id_documento: Optional[Union[int, str]] = Field(None, alias="idDocumento")
     ds_documento: Optional[str] = Field(None, alias="dsDocumento")
-    letra: str = Field(alias="letra")
-    serie: Union[str, int] = Field(alias="serie")
-    nro_doc: int = Field(alias="nrodoc")
+    letra: Optional[str] = Field(None, alias="letra")
+    serie: Optional[Union[str, int]] = Field(None, alias="serie")
+    nro_doc: Optional[int] = Field(None, alias="nrodoc")
     anulado: Optional[bool] = Field(None, alias="anulado")
     
     # Movimientos
@@ -86,14 +86,14 @@ class Sale(BaseModel):
     ds_rechazo: Optional[str] = Field(None, alias="dsRechazo")
     
     # Fechas
-    fecha_comprobante: str = Field(alias="fechaComprobate") # Typo 'Comprobate' presente en HTML defs
+    fecha_comprobante: Optional[str] = Field(None, alias="fechaComprobate") # Typo 'Comprobate' presente en HTML defs
     fecha_alta: Optional[str] = Field(None, alias="fechaAlta")
     usuario_alta: Optional[str] = Field(None, alias="usuarioAlta")
     fecha_vencimiento: Optional[str] = Field(None, alias="fechaVencimiento")
     fecha_entrega: Optional[str] = Field(None, alias="fechaEntrega")
     
     # Organización
-    id_sucursal: int = Field(alias="idSucursal")
+    id_sucursal: Optional[int] = Field(None, alias="idSucursal")
     ds_sucursal: Optional[str] = Field(None, alias="dsSucursal")
     id_fuerza_ventas: Optional[int] = Field(None, alias="idFuerzaVentas")
     ds_fuerza_ventas: Optional[str] = Field(None, alias="dsFuerzaVentas")
@@ -109,7 +109,7 @@ class Sale(BaseModel):
     ds_gerente: Optional[str] = Field(None, alias="dsGerente")
     
     # Cliente
-    id_cliente: int = Field(alias="idCliente")
+    id_cliente: Optional[int] = Field(None, alias="idCliente")
     nombre_cliente: Optional[str] = Field(None, alias="nombreCliente")
     domicilio_cliente: Optional[str] = Field(None, alias="domicilioCliente")
     codigo_postal: Optional[Union[int, str]] = Field(None, alias="codigoPostal")
@@ -220,8 +220,8 @@ class Sale(BaseModel):
     estado_fiscal: Optional[int] = Field(None, alias="estadoFiscal")
     numeracion_fiscal: Optional[Union[int, str]] = Field(None, alias="numeracionFiscal")
 
-    id_linea: int = Field(alias="idLinea")
-    id_articulo: int = Field(alias="idArticulo")
+    id_linea: Optional[int] = Field(None, alias="idLinea")
+    id_articulo: Optional[int] = Field(None, alias="idArticulo")
     ds_articulo: Optional[str] = Field(None, alias="dsArticulo")
     id_concepto: Optional[int] = Field(None, alias="idConcepto")
     ds_concepto: Optional[str] = Field(None, alias="dsConcepto")

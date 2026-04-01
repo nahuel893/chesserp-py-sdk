@@ -16,11 +16,11 @@ class ClienteRuta(BaseModel):
     Cliente asignado a una ruta.
     Ref: HTML defs["clienteRutas"]
     """
-    id_sucursal: int = Field(alias="idSucursal")
-    id_fuerza_ventas: int = Field(alias="idFuerzaVentas")
-    id_modo_atencion: str = Field(alias="idModoAtencion")  # API devuelve string (ej: 'PRE')
-    id_ruta: int = Field(alias="idRuta")
-    id_cliente: int = Field(alias="idCliente")
+    id_sucursal: Optional[int] = Field(None, alias="idSucursal")
+    id_fuerza_ventas: Optional[int] = Field(None, alias="idFuerzaVentas")
+    id_modo_atencion: Optional[str] = Field(None, alias="idModoAtencion")  # API devuelve string (ej: 'PRE')
+    id_ruta: Optional[int] = Field(None, alias="idRuta")
+    id_cliente: Optional[int] = Field(None, alias="idCliente")
     razon_social: Optional[str] = Field(None, alias="razonSocial")
     
     intercalacion_visita: OptionalInt = Field(None, alias="intercalacionVisita")
@@ -35,14 +35,14 @@ class RutaVenta(BaseModel):
     Ruta de Venta.
     Ref: HTML defs["rutasVenta"]
     """
-    id_sucursal: int = Field(alias="idSucursal")
+    id_sucursal: Optional[int] = Field(None, alias="idSucursal")
     des_sucursal: Optional[str] = Field(None, alias="desSucursal")
-    id_fuerza_ventas: int = Field(alias="idFuerzaVentas")
+    id_fuerza_ventas: Optional[int] = Field(None, alias="idFuerzaVentas")
     des_fuerza_ventas: Optional[str] = Field(None, alias="desFuerzaVentas")
-    id_modo_atencion: str = Field(alias="idModoAtencion")  # API devuelve string (ej: 'PRE')
+    id_modo_atencion: Optional[str] = Field(None, alias="idModoAtencion")  # API devuelve string (ej: 'PRE')
     des_modo_atencion: Optional[str] = Field(None, alias="desModoAtencion")
     
-    id_ruta: int = Field(alias="idRuta")
+    id_ruta: Optional[int] = Field(None, alias="idRuta")
     des_ruta: Optional[str] = Field(None, alias="desRuta")
     
     fecha_desde: Optional[str] = Field(None, alias="fechaDesde")
