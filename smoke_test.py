@@ -1,6 +1,6 @@
 """
 Smoke test para validar todos los endpoints del ChessClient y ChessWebClient.
-Usa la nueva API de services (0.2.0).
+Usa la nueva API de services (0.2.0). Todos los tests usan raw mode.
 
 Uso:
     python smoke_test.py --prefix EMPRESA1_
@@ -56,6 +56,7 @@ class SmokeTest:
             return self.client.sales.get(
                 fecha_desde=hace_7.strftime("%Y-%m-%d"),
                 fecha_hasta=hoy.strftime("%Y-%m-%d"),
+                raw=True,
             )
         return self._run("sales.get", _test)
 
@@ -71,7 +72,7 @@ class SmokeTest:
 
     def articles(self):
         return self._run("inventory.get_articles",
-                         lambda: self.client.inventory.get_articles())
+                         lambda: self.client.inventory.get_articles(raw=True))
 
     def articles_raw(self):
         return self._run("inventory.get_articles_raw",
@@ -79,7 +80,7 @@ class SmokeTest:
 
     def stock(self):
         return self._run("inventory.get_stock",
-                         lambda: self.client.inventory.get_stock(id_deposito=1))
+                         lambda: self.client.inventory.get_stock(id_deposito=1, raw=True))
 
     def stock_raw(self):
         return self._run("inventory.get_stock_raw",
@@ -87,7 +88,7 @@ class SmokeTest:
 
     def customers(self):
         return self._run("customers.get (1 lote)",
-                         lambda: self.client.customers.get(nro_lote=1))
+                         lambda: self.client.customers.get(nro_lote=1, raw=True))
 
     def customers_raw(self):
         return self._run("customers.get_raw",
@@ -96,7 +97,7 @@ class SmokeTest:
     def orders(self):
         def _test():
             hoy = date.today().strftime("%Y-%m-%d")
-            return self.client.orders.get(fecha_entrega=hoy)
+            return self.client.orders.get(fecha_entrega=hoy, raw=True)
         return self._run("orders.get", _test)
 
     def orders_raw(self):
@@ -107,7 +108,7 @@ class SmokeTest:
 
     def staff(self):
         return self._run("staff.get",
-                         lambda: self.client.staff.get())
+                         lambda: self.client.staff.get(raw=True))
 
     def staff_raw(self):
         return self._run("staff.get_raw",
@@ -115,7 +116,7 @@ class SmokeTest:
 
     def routes(self):
         return self._run("routes.get (suc=1)",
-                         lambda: self.client.routes.get(sucursal=1))
+                         lambda: self.client.routes.get(sucursal=1, raw=True))
 
     def routes_raw(self):
         return self._run("routes.get_raw (suc=1)",
@@ -123,7 +124,7 @@ class SmokeTest:
 
     def marketing(self):
         return self._run("marketing.get",
-                         lambda: self.client.marketing.get())
+                         lambda: self.client.marketing.get(raw=True))
 
     def marketing_raw(self):
         return self._run("marketing.get_raw",
@@ -133,7 +134,7 @@ class SmokeTest:
 
     def price_lists(self):
         return self._run("pricing.get_lists",
-                         lambda: self.web_client.pricing.get_lists())
+                         lambda: self.web_client.pricing.get_lists(raw=True))
 
     def price_lists_raw(self):
         return self._run("pricing.get_lists_raw",
@@ -141,13 +142,14 @@ class SmokeTest:
 
     def price_items(self):
         def _test():
-            listas = self.web_client.pricing.get_lists()
+            listas = self.web_client.pricing.get_lists(raw=True)
             if not listas:
                 return []
             primera = listas[0]
             return self.web_client.pricing.get_items(
-                id_lista=primera.id_lista,
-                id_vigencia=primera.id_vigencia,
+                id_lista=primera["listaspre"],
+                id_vigencia=primera["idvigencia"],
+                raw=True,
             )
         return self._run("pricing.get_items", _test)
 
@@ -184,20 +186,6 @@ class SmokeTest:
         self.price_lists()
         self._summary()
 
-    def run_parsed(self):
-        """Solo métodos parsed (no raw)."""
-        self.sales()
-        self.articles()
-        self.stock()
-        self.customers()
-        self.orders()
-        self.staff()
-        self.routes()
-        self.marketing()
-        self.price_lists()
-        self.price_items()
-        self._summary()
-
     def run_pricing(self):
         """Solo endpoints de pricing (web client)."""
         self.price_lists()
@@ -224,7 +212,7 @@ class SmokeTest:
 
 
 TESTS = [
-    "all", "quick", "parsed", "pricing",
+    "all", "quick", "pricing",
     "sales", "articles", "stock", "customers",
     "orders", "staff", "routes", "marketing",
     "price_lists", "price_items",
@@ -243,8 +231,6 @@ def main():
         tester.run_all()
     elif args.test == "quick":
         tester.run_quick()
-    elif args.test == "parsed":
-        tester.run_parsed()
     elif args.test == "pricing":
         tester.run_pricing()
     else:
